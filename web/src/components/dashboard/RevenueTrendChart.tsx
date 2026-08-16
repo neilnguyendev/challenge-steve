@@ -22,6 +22,7 @@ import {
   type SeriesKey,
 } from "./chart-theme";
 import { useChartPalette } from "./useChartPalette";
+import { currentMonday } from "@/lib/week";
 import { ChartTooltip } from "./ChartTooltip";
 
 interface RevenueTrendChartProps {
@@ -51,12 +52,26 @@ export function RevenueTrendChart({
   const palette = useChartPalette();
 
   if (isEmptyWeek(data)) {
+    // Only worth offering when it would actually move you. Someone already
+    // looking at the current week would click it and see nothing change.
+    const strandedInThePast = data.period.start !== currentMonday();
+
     return (
       <div
         role="status"
-        className="flex h-64 items-center justify-center rounded-card border border-dashed border-border text-sm text-text-subtle"
+        className="flex h-64 flex-col items-center justify-center gap-2 rounded-card border border-dashed border-border text-sm text-text-subtle"
       >
-        No data for this period
+        <p>No data for this period</p>
+        {strandedInThePast ? (
+          // Plain link, no query string: landing bare resolves to the current
+          // week with the default settings, which is what "back" means here.
+          <a
+            href="/"
+            className="rounded-control px-2 py-1 underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
+          >
+            Back to this week
+          </a>
+        ) : null}
       </div>
     );
   }
