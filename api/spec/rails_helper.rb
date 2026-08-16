@@ -36,6 +36,9 @@ RSpec.configure do |config|
   # Lets specs call `create(:venue)` instead of `FactoryBot.create(:venue)`.
   config.include FactoryBot::Syntax::Methods
 
+  # travel_to — used to issue a token in the past and prove it has expired.
+  config.include ActiveSupport::Testing::TimeHelpers
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

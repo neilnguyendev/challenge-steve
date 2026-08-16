@@ -50,21 +50,21 @@
 [ ] BM.AS-009.dashboard — previous-week-untraded / visitor / dashboard             | owner: S-002
 
 ## S-003 Admin signs in and privileged calls are gated
-[ ] AS-010    — correct credentials return a token + email                        | owner: S-003
-[ ] AS-011    — wrong password refused, message names neither field               | owner: S-003
-[ ] AS-012    — privileged call without token refused, no data                    | owner: S-003
-[ ] AS-013    — token signed elsewhere refused, no data                           | owner: S-003
-[ ] AS-026    — token older than 24h refused identically to absent                | owner: S-003
-[ ] BM.AS-012.admin-api — any / visitor / admin API                                | owner: S-003
-[ ] BM.AS-026.admin-api — expired session / admin / admin API                      | owner: S-003
+[x] AS-010    — correct credentials return a token + email                        | sessions_spec.rb:AS-010 issues a token and names the admin
+[x] AS-011    — wrong password refused, message names neither field               | sessions_spec.rb:AS-011 refuses wrong password / unknown email identically
+[x] AS-012    — privileged call without token refused, no data                    | trading_days_spec.rb:AS-012 refused and returns no data
+[x] AS-013    — token signed elsewhere refused, no data                           | trading_days_spec.rb:AS-013 foreign-signed and malformed both refused
+[x] AS-026    — token older than 24h refused identically to absent                | trading_days_spec.rb:AS-026 25h refused, 23h still accepted
+[x] BM.AS-012.admin-api — any / visitor / admin API                                | trading_days_spec.rb:AS-012 real guarded endpoint, no mock
+[x] BM.AS-026.admin-api — expired session / admin / admin API                      | trading_days_spec.rb:AS-026 real guarded endpoint, no mock
 
 ## S-004 The figures for a week can be saved
-[ ] AS-014    — list returns 7 days in order, untraded ones zero                  | owner: S-004
-[ ] AS-015    — bulk save replaces an existing day, no duplicate row              | owner: S-004
-[ ] AS-016    — same save records a day that had none                             | owner: S-004
-[ ] AS-017    — one bad figure abandons the whole save, others unchanged          | owner: S-004
-[ ] AS-027    — unauthenticated save refused AND nothing written                  | owner: S-004
-[ ] BM.AS-014.week-editor — partly-traded / admin / week editor                    | owner: S-004
+[x] AS-014    — list returns 7 days in order, untraded ones zero                  | trading_days_spec.rb:AS-014 seven days in order, untraded ones zero
+[x] AS-015    — bulk save replaces an existing day, no duplicate row              | trading_days_spec.rb:AS-015 overwrites in place, no duplicate row
+[x] AS-016    — same save records a day that had none                             | trading_days_spec.rb:AS-016 creates the missing rows
+[x] AS-017    — one bad figure abandons the whole save, others unchanged          | trading_days_spec.rb:AS-017 names the day, other days untouched
+[x] AS-027    — unauthenticated save refused AND nothing written                  | trading_days_spec.rb:AS-027 refused and changes nothing
+[x] BM.AS-014.week-editor — partly-traded / admin / week editor                    | trading_days_spec.rb:AS-014 real week list, no mock
 
 ## S-005 Signing in from the browser
 [ ] AS-018    — sign-in keeps session and lands on the editor                     | owner: S-005
@@ -87,7 +87,7 @@
 [ ] C-003     — no caching between admin save and dashboard read                  | owner: S-001,S-006
 [ ] C-004     — money on the wire as whole-AUD integers                           | owner: S-002,S-004
 [ ] C-005     — week saved whole or not at all                                    | owner: S-004,S-006
-[ ] C-006     — 24h session, expired behaves as absent                            | owner: S-003
+[x] C-006     — 24h session, expired behaves as absent                            | trading_days_spec.rb:AS-026 24h boundary asserted both sides
 [ ] C-007     — cannot page earlier than earliest recorded week                   | owner: S-001
 
 ## Declared out of scope
