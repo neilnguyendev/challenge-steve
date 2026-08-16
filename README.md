@@ -103,7 +103,31 @@ Migrations run on boot here too. Seeding stays manual, and on a real deployment 
 docker compose -f docker-compose.prod.yml exec api ./bin/rails db:seed
 ```
 
-Two things worth knowing. `NEXT_PUBLIC_API_BASE_URL` is compiled into the browser bundle, so changing it means rebuilding rather than restarting. And TLS redirection is on by default, so add `FORCE_SSL=false` if you are exercising this over plain `http://localhost`.
+One thing worth knowing: `NEXT_PUBLIC_API_BASE_URL` is compiled into the browser bundle, so changing it means rebuilding rather than restarting.
+
+#### Trying the production build locally
+
+Rails redirects to HTTPS in production. On a laptop that points at a port nothing is serving, and the symptom is confusing: the dashboard loads normally — Next does not redirect — but every figure fails to arrive, because each API call answers `301` to an address that refuses the connection.
+
+Turn it off and point the two URLs back at localhost:
+
+```
+FORCE_SSL=false
+CORS_ORIGINS=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+```
+
+`POSTGRES_PASSWORD`, `JWT_SECRET` and `SECRET_KEY_BASE` still have to be set — the stack refuses to start otherwise — but locally any long random string will do.
+
+```bash
+docker compose down                                          # free the ports
+docker compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml exec api ./bin/rails db:seed
+```
+
+Leave `FORCE_SSL` alone on a real deployment. It defaults to on, which is what you want behind TLS.
+
+One more thing if you run this stack more than once: PostgreSQL sets the password when it first creates its data directory and ignores the variable afterwards. Change `POSTGRES_PASSWORD` and the API will stop authenticating until you delete the volume — `docker compose -f docker-compose.prod.yml down -v`.
 
 ---
 
