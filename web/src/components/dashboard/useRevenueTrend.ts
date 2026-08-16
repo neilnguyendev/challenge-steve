@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { fetchRevenueTrend, type RevenueTrend } from "@/lib/api";
+import { ApiError, fetchRevenueTrend, type RevenueTrend } from "@/lib/api";
 
 /**
  * Fetches the figures for whatever the URL currently describes.
@@ -15,6 +15,9 @@ import { fetchRevenueTrend, type RevenueTrend } from "@/lib/api";
 export function useRevenueTrend(weekStart: string, compareMode: boolean) {
   const [data, setData] = useState<RevenueTrend | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // An empty database is not a failure — it is the state every fresh install
+  // starts in, and it deserves an explanation rather than a red banner.
+  const [empty, setEmpty] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,9 +31,17 @@ export function useRevenueTrend(weekStart: string, compareMode: boolean) {
         if (!current) return;
         setData(trend);
         setError(null);
+        setEmpty(false);
       })
       .catch((cause: unknown) => {
         if (!current) return;
+        // 404 here means the API is reachable and has nothing to report yet.
+        if (cause instanceof ApiError && cause.status === 404) {
+          setEmpty(true);
+          setError(null);
+          return;
+        }
+        setEmpty(false);
         setError(cause instanceof Error ? cause.message : "Unknown error");
       })
       .finally(() => {
@@ -42,5 +53,5 @@ export function useRevenueTrend(weekStart: string, compareMode: boolean) {
     };
   }, [weekStart, compareMode]);
 
-  return { data, error, loading };
+  return { data, error, empty, loading };
 }

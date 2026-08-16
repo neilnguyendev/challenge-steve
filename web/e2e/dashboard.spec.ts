@@ -52,7 +52,12 @@ test("comparison draws the previous period with symmetrical labels", async ({ pa
 
 test("hiding a series removes its bars and its legend entry", async ({ page }) => {
   const legend = page.locator("figcaption");
-  const drawnBefore = await page.locator(".recharts-rectangle").count();
+  const bars = page.locator(".recharts-rectangle");
+
+  // Recharts animates bars in, so a count taken the instant the wrapper
+  // appears can catch the chart mid-draw. Wait for it to settle first.
+  await expect.poll(() => bars.count()).toBeGreaterThan(0);
+  const drawnBefore = await bars.count();
   const seriesBefore = await page.locator(".recharts-bar").count();
 
   await page.getByRole("checkbox", { name: "Labour Costs" }).uncheck();
@@ -64,7 +69,7 @@ test("hiding a series removes its bars and its legend entry", async ({ page }) =
   // Seven fewer rectangles are drawn, but the series itself stays mounted so
   // the remaining bars keep their slots. Both halves matter: if the series
   // unmounted, Recharts would re-centre the group and every bar would move.
-  expect(await page.locator(".recharts-rectangle").count()).toBe(drawnBefore - 7);
+  await expect.poll(() => bars.count()).toBe(drawnBefore - 7);
   expect(await page.locator(".recharts-bar").count()).toBe(seriesBefore);
 });
 

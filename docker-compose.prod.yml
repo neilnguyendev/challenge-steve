@@ -5,11 +5,9 @@
 # Differences from the development stack, all of them deliberate:
 #   - both images are built, not mounted; editing a file changes nothing until
 #     the image is rebuilt
-#   - Rails runs RAILS_ENV=production. Its entrypoint calls db:prepare, which
-#     migrates always and seeds only when it creates the database — so this
-#     stack comes up with the demo week already in it, which is what you want
-#     for a review and not what you would want on a real deployment. Point
-#     DATABASE_URL at an existing database and no seeding happens.
+#   - Rails runs RAILS_ENV=production. Its entrypoint creates the database and
+#     migrates; it never seeds. Demo data is loaded by an explicit command, so
+#     deploying can never put sample rows into a real database as a side effect.
 #   - Next serves a compiled standalone build rather than the dev server
 #   - neither container runs as root
 name: challenge-steve-prod

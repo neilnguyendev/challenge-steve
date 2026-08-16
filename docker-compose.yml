@@ -25,10 +25,13 @@ services:
 
   api:
     # No `command:` here on purpose — the image's entrypoint
-    # (api/bin/docker-dev-entrypoint) waits for Postgres, runs `rails db:prepare`
-    # to create/migrate/seed, prepares the test database, and only then starts
-    # the server. Putting it there rather than in a compose `command` means it
-    # also runs for `docker compose run api …` and for a plain `docker run`.
+    # (api/bin/docker-dev-entrypoint) waits for Postgres, creates the database,
+    # migrates, prepares the test database, and only then starts the server.
+    # Putting it there rather than in a compose `command` means it also runs for
+    # `docker compose run api …` and for a plain `docker run`.
+    #
+    # It does NOT seed. Sample data is loaded by hand:
+    #   docker compose exec api bundle exec rails db:seed
     build:
       context: ./api
       dockerfile: Dockerfile.dev

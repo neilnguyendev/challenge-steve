@@ -1,8 +1,11 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
+# Create the database if it is missing and apply migrations before serving.
+# Deliberately not db:prepare, which would also seed on first creation — demo
+# data is loaded by an explicit command, never as a side effect of deploying.
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
-  ./bin/rails db:prepare
+  ./bin/rails db:create
+  ./bin/rails db:migrate
 fi
 
 exec "${@}"

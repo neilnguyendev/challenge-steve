@@ -13,11 +13,15 @@ done
 # A stale pid file from an unclean shutdown stops Puma from booting.
 rm -f tmp/pids/server.pid
 
-# db:prepare creates the database if it is missing, runs any pending
-# migrations, and loads seeds only on first creation — so restarts are cheap
-# and never clobber data the admin has entered.
-echo "[entrypoint] preparing database ..."
-bundle exec rails db:prepare
+# create + migrate, deliberately NOT db:prepare. db:prepare also seeds when it
+# creates the database, which quietly makes "start the app" and "put demo data
+# in it" the same action — fine the first time, surprising every time after.
+# Seeding is a separate command; see the README.
+echo "[entrypoint] creating database if needed ..."
+bundle exec rails db:create
+
+echo "[entrypoint] running migrations ..."
+bundle exec rails db:migrate
 
 # The README tells people to run `docker compose exec api bundle exec rspec`.
 # Without this, the first such run after a fresh volume fails on a missing

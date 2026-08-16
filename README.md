@@ -25,7 +25,7 @@ Don't have it? `brew install --cask docker` on macOS, or `curl -fsSL https://get
 
 ### Development
 
-Hot reload, seeded data, test databases prepared. This is the one to use for a review.
+Hot reload, test databases prepared, sample data one command away. This is the one to use for a review.
 
 ```bash
 git clone git@github.com:neilnguyendev/challenge-steve.git
@@ -34,9 +34,15 @@ cp .env.example .env
 docker compose up --build
 ```
 
-First build takes 3–5 minutes; later starts take seconds.
+First build takes 3–5 minutes; later starts take seconds. The API container creates the database and applies migrations before the server boots — no separate migrate step to remember.
 
-The API container's entrypoint prepares the database before the server boots. Migrations run every time; **the seed runs only when the database is first created**, so restarting never overwrites figures you have entered. To get the demo data back, delete the volume — `docker compose down -v`.
+**Then load the sample data**, in another terminal:
+
+```bash
+docker compose exec api bundle exec rails db:seed
+```
+
+Starting the app and putting data in it are two actions on purpose. Until you run the seed the dashboard says so and offers the command; run it whenever you want the sample week back. It is safe to repeat — it updates the same rows rather than adding more.
 
 | | URL |
 |---|---|
@@ -63,6 +69,13 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up --build
 ```
 
 Every one of those is required — the stack refuses to start without them rather than quietly falling back to a development default.
+
+Migrations run on boot here too. Seeding stays manual, and on a real deployment you would usually skip it entirely — it exists to make a review possible, not to populate a production database:
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod \
+  exec api ./bin/rails db:seed
+```
 
 Two things worth knowing. `NEXT_PUBLIC_API_BASE_URL` is compiled into the browser bundle, so changing it means rebuilding rather than restarting. And TLS redirection is on by default, so add `FORCE_SSL=false` if you are exercising this over plain `http://localhost`.
 
@@ -97,7 +110,7 @@ Ports default to web `3000`, API `3001`, PostgreSQL `5433` — the last moved of
 
 ```bash
 docker compose exec api bundle exec rails db:migrate    # also runs on container start
-docker compose exec api bundle exec rails db:seed
+docker compose exec api bundle exec rails db:seed       # never runs on its own
 docker compose exec api bundle exec rails console
 docker compose exec db psql -U revenue -d revenue_development
 ```
@@ -106,6 +119,7 @@ docker compose exec db psql -U revenue -d revenue_development
 
 ```bash
 docker compose down -v && docker compose up --build
+docker compose exec api bundle exec rails db:seed
 ```
 
 ### Logs

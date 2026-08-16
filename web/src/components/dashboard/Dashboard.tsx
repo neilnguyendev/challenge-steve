@@ -25,7 +25,7 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
     toggleSeries,
   } = useDashboardView(fallbackWeekStart);
 
-  const { data, error, loading } = useRevenueTrend(weekStart, compareMode);
+  const { data, error, empty, loading } = useRevenueTrend(weekStart, compareMode);
 
   // The export reads whatever is inside this element, so it always matches
   // what the visitor is looking at rather than a re-render of its own.
@@ -51,6 +51,27 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
         onChangeWeek={goToWeek}
         chartRef={chartRef}
       />
+
+      {/* No figures recorded yet. Every fresh install starts here, so it says
+          what to do rather than reporting a failure. */}
+      {empty ? (
+        <section className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border px-6 py-14 text-center">
+          <h2 className="text-base font-semibold text-text">No figures yet</h2>
+          <p className="max-w-md text-sm text-text-muted">
+            Nothing has been recorded for this venue. Load the sample week, or
+            sign in and enter the figures yourself.
+          </p>
+          <code className="rounded-control bg-surface-sunken px-3 py-2 text-xs text-text-muted">
+            docker compose exec api bundle exec rails db:seed
+          </code>
+          <a
+            href="/admin/trading-days"
+            className="mt-1 inline-flex min-h-11 items-center rounded-full bg-accent px-5 text-sm font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+          >
+            Enter figures
+          </a>
+        </section>
+      ) : null}
 
       {error ? (
         <p
