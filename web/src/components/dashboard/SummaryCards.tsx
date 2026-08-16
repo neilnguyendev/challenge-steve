@@ -52,15 +52,15 @@ function SummaryCard({
 
   return (
     <article className="flex flex-col gap-1 rounded-card bg-surface-sunken px-5 py-4">
-      <h2 className="text-sm text-text-muted">{label}</h2>
+      <h2 className="text-sm font-medium text-text-muted">{label}</h2>
 
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span className="tabular text-2xl font-semibold tracking-tight text-text">
+        <span className="tabular text-2xl font-bold tracking-tight text-text">
           {format(figure.current)}
         </span>
 
         {compareMode && figure.previous !== null ? (
-          <span className="text-sm text-text-subtle">
+          <span className="text-sm font-medium text-text-subtle">
             vs <span className="tabular">{format(figure.previous)}</span>
           </span>
         ) : null}
@@ -77,7 +77,7 @@ function SummaryCard({
             data-testid={`delta-${label}`}
             data-direction={rising ? "up" : "down"}
             className={[
-              "tabular text-sm font-medium",
+              "tabular text-sm font-semibold",
               rising ? "text-positive" : "text-negative",
             ].join(" ")}
           >

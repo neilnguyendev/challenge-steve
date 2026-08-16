@@ -24,3 +24,21 @@ test("utilities built from design tokens actually reach the page", async ({ page
   expect(applied.accent).not.toBe("auto");
   expect(applied.cardRadius).not.toBe("0px");
 });
+
+test("every clickable thing says so under the cursor", async ({ page }) => {
+  // Labels bound to an input focus it on click, so they are clickable too —
+  // and they are the ones that quietly keep the default arrow.
+  for (const path of ["/", "/admin/login"]) {
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+
+    const wrong = await page.evaluate(() =>
+      [...document.querySelectorAll("button, a, label, input[type=checkbox]")]
+        .filter((el) => !(el as HTMLButtonElement).disabled)
+        .filter((el) => getComputedStyle(el).cursor !== "pointer")
+        .map((el) => `${el.tagName}: ${(el.textContent || "").trim().slice(0, 20)}`),
+    );
+
+    expect(wrong, `on ${path}`).toEqual([]);
+  }
+});
