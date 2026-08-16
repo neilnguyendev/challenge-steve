@@ -6,5 +6,10 @@ storage/*
 vendor/bundle
 .env*
 !.env.example
+
+# Never bake the decryption key into an image. It is gitignored, so a fresh
+# clone has no copy — but a build from a working machine would otherwise pick
+# one up, and the image would then carry a secret it must not hold.
+config/master.key
 Dockerfile*
 .dockerignore

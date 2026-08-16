@@ -1,0 +1,75 @@
+# Production build of the same three services.
+#
+#   docker compose -f docker-compose.prod.yml up --build
+#
+# Differences from the development stack, all of them deliberate:
+#   - both images are built, not mounted; editing a file changes nothing until
+#     the image is rebuilt
+#   - Rails runs RAILS_ENV=production. Its entrypoint calls db:prepare, which
+#     migrates always and seeds only when it creates the database — so this
+#     stack comes up with the demo week already in it, which is what you want
+#     for a review and not what you would want on a real deployment. Point
+#     DATABASE_URL at an existing database and no seeding happens.
+#   - Next serves a compiled standalone build rather than the dev server
+#   - neither container runs as root
+name: challenge-steve-prod
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-revenue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-revenue_production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-revenue} -d ${POSTGRES_DB:-revenue_production}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    # The Dockerfile `rails new` generated: multi-stage, non-root, and its
+    # entrypoint runs db:prepare before the server, so migrations are applied
+    # on deploy without a separate step.
+    build:
+      context: ./api
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-revenue}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-revenue_production}
+      # Required in production — Rails refuses to boot without it.
+      #   openssl rand -hex 64
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?set SECRET_KEY_BASE}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS}
+      # Leave unset behind TLS. Set false only to exercise this stack over
+      # http://localhost, where the redirect would otherwise go nowhere.
+      FORCE_SSL: ${FORCE_SSL:-true}
+      RAILS_LOG_TO_STDOUT: "1"
+    ports:
+      - "${API_PORT:-3001}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      args:
+        # Baked into the client bundle at build time, so this is a build arg
+        # rather than an environment variable — changing it needs a rebuild.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?set NEXT_PUBLIC_API_BASE_URL}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:

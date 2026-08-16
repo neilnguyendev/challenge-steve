@@ -32,3 +32,6 @@
 .idea/
 .vscode/
 *.swp
+
+# Local-only env for exercising the production stack
+.env.prod.local
