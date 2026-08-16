@@ -42,7 +42,7 @@ First build takes 3–5 minutes; later starts take seconds. The API container cr
 docker compose exec api bundle exec rails db:seed
 ```
 
-Starting the app and putting data in it are two actions on purpose. Until you run the seed the dashboard says so and offers the command; run it whenever you want the sample week back. It is safe to repeat — it updates the same rows rather than adding more.
+Starting the app and putting data in it are two actions on purpose. Until you run the seed the dashboard says there are no figures yet; run it whenever you want the sample week back. It is safe to repeat — it updates the same rows rather than adding more.
 
 | | URL |
 |---|---|
@@ -51,6 +51,16 @@ Starting the app and putting data in it are two actions on purpose. Until you ru
 | API | http://localhost:3001/api/v1/revenue_trend |
 
 Sign in with **`admin@example.com`** / **`password123`**, change a figure, and it appears on the dashboard.
+
+**Starting over.** `-v` is the part that matters — it deletes the database volume. Without it the data survives and you get the same state back:
+
+```bash
+docker compose down -v          # stop and throw the database away
+docker compose up --build       # fresh database, migrated, empty
+docker compose exec api bundle exec rails db:seed
+```
+
+To stop without losing anything, leave `-v` off.
 
 ### Production
 
