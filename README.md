@@ -61,12 +61,24 @@ Then open:
 
 | | URL |
 |---|---|
-| Dashboard | http://localhost:3000 |
-| API | http://localhost:3001/api/v1/venues |
+| **Dashboard** | http://localhost:3000 |
+| **Admin sign-in** | http://localhost:3000/admin/login |
+| **Week editor** | http://localhost:3000/admin/trading-days |
+| API | http://localhost:3001/api/v1/revenue_trend |
 | API health check | http://localhost:3001/up |
 | PostgreSQL | `localhost:5433` |
 
 The database is created, migrated and seeded automatically on first boot — there is no separate setup step to remember.
+
+### Try the whole loop in a minute
+
+1. Open the **dashboard** and note the Total Revenue figure.
+2. Press **Compare to Previous** — the chart gains the previous week's bars and each card gains a change against it.
+3. Sign in at **/admin/login** with the credentials below.
+4. Change Wednesday's POS Revenue in the week editor and press **Save week**.
+5. Go back to the dashboard. Wednesday's bar and the Total Revenue card have both moved by exactly what you typed.
+
+Step 5 is what the whole project is for, and it has a test of its own — see *Tests* below.
 
 ### Admin credentials
 
@@ -78,6 +90,12 @@ Password: password123
 ```
 
 Change them by editing `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` in `.env` before the first `docker compose up`, or see *Reset the database* below.
+
+### What the admin area does
+
+The week editor always shows seven rows, including days the venue did not trade — those read `0` rather than sitting blank, because zero is a figure the manager may need to state.
+
+All seven days are saved **together, in one transaction**. If any figure is invalid the whole save is refused and nothing changes, so a corrected Wednesday and a mistyped Friday cannot end up half-applied.
 
 ### Stopping
 
@@ -132,8 +150,8 @@ All of these run against the running containers.
 ### Tests
 
 ```bash
-docker compose exec api bundle exec rspec      # backend
-docker compose exec web pnpm test               # frontend
+docker compose exec api bundle exec rspec      # backend  — 38 examples
+docker compose exec web pnpm test              # frontend — 81 tests
 ```
 
 To run a single file or example:
@@ -142,6 +160,34 @@ To run a single file or example:
 docker compose exec api bundle exec rspec spec/models/trading_day_spec.rb
 docker compose exec api bundle exec rspec spec/models/trading_day_spec.rb:12
 docker compose exec web pnpm exec vitest run src/lib/api.test.ts
+```
+
+**The one that matters most.** `api/spec/requests/seam_admin_to_dashboard_spec.rb` signs in for a real token, saves a week through the admin endpoint, and reads it back through the public one — against the real database, with nothing stubbed at either end:
+
+```bash
+docker compose exec api bundle exec rspec spec/requests/seam_admin_to_dashboard_spec.rb
+```
+
+A mocked version of that test would pass while the two halves disagreed about which field appears on which response, which is the only failure it exists to catch.
+
+### Browser tests (Playwright)
+
+These drive a real Chromium against the running containers, so **start the stack first**. They run from the host rather than inside a container, to avoid shipping browser binaries in the image.
+
+```bash
+cd web
+npm install -g pnpm            # if you do not have it
+pnpm install
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+Seven checks: the sign-in guard, the wrong-password path, the admin-to-dashboard round trip in a real browser, and a layout regression guard that asserts the page does not change width when comparison is switched on.
+
+```bash
+pnpm exec playwright test e2e/admin.spec.ts    # one file
+pnpm exec playwright test --headed             # watch it happen
+pnpm exec playwright test --ui                 # step through interactively
 ```
 
 ### Database
@@ -209,9 +255,14 @@ docker compose up --build
 │
 ├── web/                     # Next.js 16
 │   ├── src/
-│   │   ├── app/             # App Router pages
+│   │   ├── app/             # routes: /, /admin/login, /admin/trading-days
+│   │   ├── components/
+│   │   │   ├── dashboard/   # chart, summary cards, header controls
+│   │   │   └── admin/       # sign-in form, guard, week editor
 │   │   └── lib/api.ts       # the only place that talks to the API
+│   ├── e2e/                 # Playwright, runs against the containers
 │   ├── vitest.config.mts
+│   ├── playwright.config.ts
 │   └── Dockerfile.dev
 │
 └── docs/

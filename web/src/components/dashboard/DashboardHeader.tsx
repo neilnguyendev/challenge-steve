@@ -41,11 +41,13 @@ export function DashboardHeader({
   return (
     <header className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="max-w-xs text-xl font-semibold leading-tight tracking-tight text-neutral-900">
+        {/* The title yields space so the controls stay on one row; it wraps
+            onto a second line rather than pushing them below. */}
+        <h1 className="min-w-[12rem] flex-1 text-xl font-semibold leading-tight tracking-tight text-neutral-900">
           {title}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-5">
+        <div className="flex shrink-0 flex-wrap items-center gap-4">
           {SERIES_KEYS.map((key) => (
             <label
               key={key}

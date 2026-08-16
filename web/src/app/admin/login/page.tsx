@@ -14,7 +14,7 @@ function SignIn() {
 
 export default function AdminLoginPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-6 px-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Admin sign in</h1>
         <p className="mt-1 text-sm text-neutral-500">

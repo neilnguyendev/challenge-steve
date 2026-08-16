@@ -39,7 +39,7 @@ export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
   const canGoLater = data ? hasLaterWeek(weekStart, data.available_range.latest) : true;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-6 py-12">
       <DashboardHeader
         weekStart={weekStart}
         compareMode={compareMode}

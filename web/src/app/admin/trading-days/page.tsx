@@ -14,7 +14,7 @@ export default function AdminTradingDaysPage() {
       currentPath="/admin/trading-days"
       onRedirect={(target) => router.replace(target)}
     >
-      <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-12">
+      <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Trading figures</h1>
