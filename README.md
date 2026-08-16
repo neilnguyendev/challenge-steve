@@ -66,21 +66,27 @@ To stop without losing anything, leave `-v` off.
 
 Compiled images rather than mounted source, `RAILS_ENV=production`, a standalone Next build, and neither container running as root.
 
-Same `.env`, real values in it. On the machine you deploy to, that file is the one you create anyway:
+Same `.env` file as development — on the machine you deploy to, that is the one you create anyway. Start from the template and change what matters:
 
 ```bash
-cat > .env <<'ENV'
-POSTGRES_PASSWORD=<choose one>
-SECRET_KEY_BASE=<openssl rand -hex 64>
-JWT_SECRET=<openssl rand -hex 32>
-CORS_ORIGINS=https://your-domain
-NEXT_PUBLIC_API_BASE_URL=https://api.your-domain
-ENV
-
+cp .env.example .env
+$EDITOR .env
 docker compose -f docker-compose.prod.yml up --build
 ```
 
-Compose reads `.env` on its own, so there is no `--env-file` to remember. Every one of those values is required — the stack refuses to start without them rather than quietly falling back to a development default.
+Compose reads `.env` on its own, so there is no `--env-file` to remember.
+
+**What must change before this is safe:**
+
+| Variable | In the template | For production |
+|---|---|---|
+| `POSTGRES_PASSWORD` | `revenue` | anything but that |
+| `JWT_SECRET` | a placeholder saying so | `openssl rand -hex 32` |
+| `SECRET_KEY_BASE` | commented out | uncomment, `openssl rand -hex 64` — Rails will not boot without it |
+| `CORS_ORIGINS` | `http://localhost:3000` | the origin serving the dashboard |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:3001` | the address the **browser** reaches the API on |
+
+The three secrets are enforced rather than trusted — the stack refuses to start without them instead of quietly falling back to a development default. `RAILS_ENV` needs no attention: the production compose file sets it regardless of what `.env` says.
 
 Migrations run on boot here too. Seeding stays manual, and on a real deployment you would usually skip it entirely — it exists to make a review possible, not to populate a production database:
 
@@ -123,7 +129,7 @@ Ports default to web `3000`, API `3001`, PostgreSQL `5433` — the last moved of
 docker compose exec api bundle exec rails db:migrate    # also runs on container start
 docker compose exec api bundle exec rails db:seed       # never runs on its own
 docker compose exec api bundle exec rails console
-docker compose exec db psql -U revenue -d revenue_development
+docker compose exec db psql -U revenue -d revenue_db
 ```
 
 ### Reset the database

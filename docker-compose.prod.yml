@@ -18,14 +18,14 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-revenue}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-revenue_production}
+      POSTGRES_DB: ${POSTGRES_DB:-revenue_db}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-revenue} -d ${POSTGRES_DB:-revenue_production}",
+          "pg_isready -U ${POSTGRES_USER:-revenue} -d ${POSTGRES_DB:-revenue_db}",
         ]
       interval: 5s
       timeout: 3s
@@ -39,7 +39,7 @@ services:
       context: ./api
     environment:
       RAILS_ENV: production
-      DATABASE_URL: postgres://${POSTGRES_USER:-revenue}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-revenue_production}
+      DATABASE_URL: postgres://${POSTGRES_USER:-revenue}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-revenue_db}
       # Required in production — Rails refuses to boot without it.
       #   openssl rand -hex 64
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?set SECRET_KEY_BASE}

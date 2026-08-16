@@ -1,6 +1,6 @@
 # Every environment reads DATABASE_URL, which docker-compose supplies.
 # Running outside Docker? Export it yourself, for example:
-#   export DATABASE_URL=postgres://revenue:revenue@localhost:5433/revenue_development
+#   export DATABASE_URL=postgres://revenue:revenue@localhost:5433/revenue_db
 default: &default
   adapter: postgresql
   encoding: unicode
