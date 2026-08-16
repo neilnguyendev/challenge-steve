@@ -94,7 +94,7 @@ export function LoginForm({ next, onSignedIn }: LoginFormProps) {
       {formError ? (
         <p
           role="alert"
-          className="flex items-start gap-2 rounded-[--radius-sm] border border-negative/30 bg-negative-surface px-3 py-2.5 text-sm text-negative"
+          className="flex items-start gap-2 rounded-2xl border border-negative/30 bg-negative-surface px-3.5 py-2.5 text-sm text-negative"
         >
           <AlertIcon />
           <span>{formError}</span>
@@ -104,7 +104,7 @@ export function LoginForm({ next, onSignedIn }: LoginFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-1 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[--radius-sm] bg-accent px-4 text-sm font-medium text-on-accent transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-1 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-accent px-4 text-sm font-medium text-on-accent transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? "Signing in…" : "Sign in"}
       </button>
@@ -151,7 +151,7 @@ function Field({
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         className={[
-          "min-h-11 rounded-[--radius-sm] border bg-surface px-3 text-sm text-text",
+          "min-h-11 rounded-xl border bg-surface px-3.5 text-sm text-text",
           "transition-colors duration-150 hover:border-text-subtle",
           error ? "border-negative" : "border-border-strong",
         ].join(" ")}

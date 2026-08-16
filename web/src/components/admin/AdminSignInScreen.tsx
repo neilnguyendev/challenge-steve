@@ -16,7 +16,7 @@ export function AdminSignInScreen() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-6 py-12">
       <div className="flex flex-col gap-2">
-        <span className="inline-flex size-10 items-center justify-center rounded-[--radius] bg-accent text-on-accent">
+        <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-accent text-on-accent">
           <svg
             aria-hidden
             viewBox="0 0 24 24"

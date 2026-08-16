@@ -47,7 +47,7 @@ export function WeekEditorScreen() {
             {/* Carries the week across, so switching views does not lose it. */}
             <a
               href={`/?week=${weekStart}`}
-              className="inline-flex min-h-11 items-center rounded-[--radius-sm] px-2 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
+              className="inline-flex min-h-11 items-center rounded-full px-3 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:bg-surface-hover hover:text-text hover:decoration-current hover:no-underline"
             >
               View dashboard
             </a>
@@ -57,7 +57,7 @@ export function WeekEditorScreen() {
                 clearToken();
                 router.replace("/admin/login");
               }}
-              className="inline-flex min-h-11 cursor-pointer items-center rounded-[--radius-sm] px-2 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
+              className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:bg-surface-hover hover:text-text hover:decoration-current hover:no-underline"
             >
               Sign out
             </button>

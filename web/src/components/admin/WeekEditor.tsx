@@ -100,7 +100,7 @@ export function WeekEditor({ weekStart, onChangeWeek }: WeekEditorProps) {
     return (
       <p
         role="alert"
-        className="rounded-[--radius] border border-negative/30 bg-negative-surface px-4 py-3 text-sm text-negative"
+        className="rounded-2xl border border-negative/30 bg-negative-surface px-4 py-3 text-sm text-negative"
       >
         The week could not be loaded: {loadError}
       </p>
@@ -113,7 +113,7 @@ export function WeekEditor({ weekStart, onChangeWeek }: WeekEditorProps) {
         {Array.from({ length: 8 }, (_, i) => (
           <div
             key={i}
-            className="h-11 animate-pulse rounded-[--radius-sm] bg-surface-sunken"
+            className="h-11 animate-pulse rounded-xl bg-surface-sunken"
           />
         ))}
       </div>
@@ -159,7 +159,7 @@ export function WeekEditor({ weekStart, onChangeWeek }: WeekEditorProps) {
         tabIndex={0}
         role="region"
         aria-label="Trading figures for the week"
-        className="overflow-x-auto rounded-[--radius] border border-border"
+        className="overflow-hidden overflow-x-auto rounded-2xl border border-border"
       >
         <table className="w-full min-w-[44rem] border-collapse text-sm">
           <thead>
@@ -238,7 +238,7 @@ export function WeekEditor({ weekStart, onChangeWeek }: WeekEditorProps) {
         <button
           type="submit"
           disabled={status.kind === "saving"}
-          className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-[--radius-sm] bg-accent px-5 text-sm font-medium text-on-accent transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-accent px-6 text-sm font-medium text-on-accent transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {status.kind === "saving" ? "Saving…" : "Save week"}
         </button>
@@ -312,7 +312,7 @@ function Cell({
         aria-describedby={error ? errorId : undefined}
         onChange={(e) => onChange(day.date, field, e.target.value)}
         className={[
-          "tabular h-11 w-28 rounded-[--radius-sm] border bg-surface px-2 text-text",
+          "tabular h-11 w-28 rounded-xl border bg-surface px-3 text-text",
           "transition-colors duration-150 hover:border-text-subtle",
           error ? "border-negative" : "border-border-strong",
         ].join(" ")}
@@ -340,7 +340,7 @@ function StepButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex size-11 cursor-pointer items-center justify-center rounded-[--radius-sm] border border-border text-text-muted transition-colors duration-150 hover:bg-surface-hover"
+      className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full border border-border text-text-muted transition-colors duration-150 hover:bg-surface-hover"
     >
       <svg
         aria-hidden
