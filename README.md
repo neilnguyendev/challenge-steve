@@ -31,16 +31,18 @@ Hot reload, test databases prepared, sample data one command away. This is the o
 git clone git@github.com:neilnguyendev/challenge-steve.git
 cd challenge-steve
 cp .env.example .env
-docker compose up --build
+docker compose up --build -d
 ```
 
 First build takes 3–5 minutes; later starts take seconds. The API container creates the database and applies migrations before the server boots — no separate migrate step to remember.
 
-**Then load the sample data**, in another terminal:
+**Then load the sample data:**
 
 ```bash
 docker compose exec api bundle exec rails db:seed
 ```
+
+Watch it come up with `docker compose logs -f`, and stop with `docker compose down`.
 
 Starting the app and putting data in it are two actions on purpose. Until you run the seed the dashboard says there are no figures yet; run it whenever you want the sample week back. It is safe to repeat — it updates the same rows rather than adding more.
 
@@ -56,7 +58,7 @@ Sign in with **`admin@example.com`** / **`password123`**, change a figure, and i
 
 ```bash
 docker compose down -v          # stop and throw the database away
-docker compose up --build       # fresh database, migrated, empty
+docker compose up --build -d    # fresh database, migrated, empty
 docker compose exec api bundle exec rails db:seed
 ```
 
@@ -74,7 +76,13 @@ cp .env.example .env
 # Now open .env and set the production values listed below.
 # Build only once you have.
 
-docker compose -f docker-compose.prod.yml up --build
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+**Stop the development stack first.** Both use ports 3000, 3001 and 5433, so whichever starts second fails with `port is already allocated`:
+
+```bash
+docker compose down
 ```
 
 **What must change before this is safe:**
@@ -136,7 +144,7 @@ docker compose exec db psql -U revenue -d revenue_db
 ### Reset the database
 
 ```bash
-docker compose down -v && docker compose up --build
+docker compose down -v && docker compose up --build -d
 docker compose exec api bundle exec rails db:seed
 ```
 
@@ -152,7 +160,7 @@ docker compose logs -f api      # one service
 Editing `api/Gemfile` or `web/package.json` needs a rebuild — the install step is baked into the image layer:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 ---
