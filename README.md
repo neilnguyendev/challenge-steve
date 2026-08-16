@@ -179,6 +179,15 @@ docker compose logs -f          # everything
 docker compose logs -f api      # one service
 ```
 
+### After changing .env
+
+A container keeps the environment it was created with, so `restart` will not see
+your edit — recreate it instead:
+
+```bash
+docker compose up -d            # picks up the new values
+```
+
 ### After changing dependencies
 
 Editing `api/Gemfile` or `web/package.json` needs a rebuild — the install step is baked into the image layer:
