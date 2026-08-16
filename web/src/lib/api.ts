@@ -78,3 +78,53 @@ export interface Venue {
 export function fetchVenues(): Promise<{ venues: Venue[] }> {
   return apiFetch<{ venues: Venue[] }>("/api/v1/venues");
 }
+
+/** The two revenue streams plus costs and headcount, for one day. */
+export interface DayFigures {
+  pos_revenue: number;
+  eatclub_revenue: number;
+  labour_cost: number;
+  covers: number;
+}
+
+export interface SeriesEntry {
+  date: string;
+  weekday: string;
+  current: DayFigures;
+  /** null unless comparison is on. Same field names as `current`. */
+  previous: DayFigures | null;
+}
+
+export interface SummaryFigure {
+  current: number;
+  previous: number | null;
+  /** null when there is no baseline to compare against — never Infinity. */
+  delta_pct: number | null;
+}
+
+export interface RevenueTrend {
+  period: { start: string; end: string };
+  previous_period: { start: string; end: string } | null;
+  /** Bounds week navigation: nothing was traded outside this range. */
+  available_range: { earliest: string | null; latest: string | null };
+  summary: {
+    total_revenue: SummaryFigure;
+    average_per_day: SummaryFigure;
+    total_covers: SummaryFigure;
+  };
+  series: SeriesEntry[];
+}
+
+export function fetchRevenueTrend(options: {
+  weekStart: string;
+  compare: boolean;
+  venueId?: number;
+}): Promise<RevenueTrend> {
+  const query = new URLSearchParams({
+    week_start: options.weekStart,
+    compare: String(options.compare),
+  });
+  if (options.venueId) query.set("venue_id", String(options.venueId));
+
+  return apiFetch<RevenueTrend>(`/api/v1/revenue_trend?${query}`);
+}

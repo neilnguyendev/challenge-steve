@@ -22,22 +22,22 @@
 [ ] FE04-AS-8  — tooltip: 6 rows, segment value not cumulative                    | owner: FE-04
 
 ## S-001 Choose what the chart shows
-[ ] AS-001.T1 — heading reads "This Week's Revenue Trend"                         | owner: S-001
-[ ] AS-001.T2 — current week Mon..Sun requested and shown                         | owner: S-001
-[ ] AS-001.T3 — all three series visible by default                               | owner: S-001
-[ ] AS-002.T1 — heading gains "vs Previous Period"                                | owner: S-001
-[ ] AS-002.T2 — comparison refetches with compare=true                            | owner: S-001
-[ ] AS-002.T3 — toggle shows active state                                         | owner: S-001
-[ ] AS-003.T1 — unticking a series marks it hidden                                | owner: S-001
-[ ] AS-003.T2 — no API request follows a series toggle                            | owner: S-001
-[ ] AS-004.T1 — earlier week refetched                                            | owner: S-001
-[ ] AS-004.T2 — comparison setting survives the week change                       | owner: S-001
-[ ] AS-005.T1 — unreachable API reports failure                                   | owner: S-001
-[ ] AS-005.T2 — controls stay usable after failure                                | owner: S-001
-[ ] AS-025    — back control unavailable at earliest recorded week                | owner: S-001
-[ ] BM.AS-001.dashboard — week-has-figures / visitor / dashboard                   | owner: S-001
-[ ] BM.AS-002.dashboard — comparing / visitor / dashboard                          | owner: S-001
-[ ] BM.AS-025.dashboard — earliest week / visitor / dashboard                      | owner: S-001
+[x] AS-001.T1 — heading reads "This Week's Revenue Trend"                         | Dashboard.test.tsx:AS-001 names the week (heading assertion)
+[x] AS-001.T2 — current week Mon..Sun requested and shown                         | Dashboard.test.tsx:AS-001 requests week_start=2026-08-10
+[x] AS-001.T3 — all three series visible by default                               | Dashboard.test.tsx:AS-001 all three checkboxes checked
+[x] AS-002.T1 — heading gains "vs Previous Period"                                | Dashboard.test.tsx:AS-002 heading becomes 'vs Previous Period'
+[x] AS-002.T2 — comparison refetches with compare=true                            | Dashboard.test.tsx:AS-002 refetches with compare=true
+[x] AS-002.T3 — toggle shows active state                                         | Dashboard.test.tsx:AS-002 aria-pressed false -> true
+[x] AS-003.T1 — unticking a series marks it hidden                                | Dashboard.test.tsx:AS-003 checkbox unchecked, visible-series = pos,eatclub
+[x] AS-003.T2 — no API request follows a series toggle                            | Dashboard.test.tsx:AS-003 fetch call count unchanged
+[x] AS-004.T1 — earlier week refetched                                            | Dashboard.test.tsx:AS-004 refetches week_start=2026-08-03
+[x] AS-004.T2 — comparison setting survives the week change                       | Dashboard.test.tsx:AS-004 compare=true survives the week change
+[x] AS-005.T1 — unreachable API reports failure                                   | Dashboard.test.tsx:AS-005 alert reports the failure
+[x] AS-005.T2 — controls stay usable after failure                                | Dashboard.test.tsx:AS-005 toggle still enabled and refetches
+[x] AS-025    — back control unavailable at earliest recorded week                | Dashboard.test.tsx:AS-025 disabled at earliest / enabled otherwise; week.test.ts hasEarlierWeek
+[x] BM.AS-001.dashboard — week-has-figures / visitor / dashboard                   | Dashboard.test.tsx:AS-001 real hook + fetch, no mocked component
+[x] BM.AS-002.dashboard — comparing / visitor / dashboard                          | Dashboard.test.tsx:AS-002 real hook + fetch, no mocked component
+[x] BM.AS-025.dashboard — earliest week / visitor / dashboard                      | Dashboard.test.tsx:AS-025 real available_range from response
 
 ## S-002 Read the week's headline figures
 [ ] AS-006.T1 — three figures, no comparison text                                 | owner: S-002
@@ -88,7 +88,7 @@
 [ ] C-004     — money on the wire as whole-AUD integers                           | owner: S-002,S-004
 [ ] C-005     — week saved whole or not at all                                    | owner: S-004,S-006
 [x] C-006     — 24h session, expired behaves as absent                            | trading_days_spec.rb:AS-026 24h boundary asserted both sides
-[ ] C-007     — cannot page earlier than earliest recorded week                   | owner: S-001
+[x] C-007     — cannot page earlier than earliest recorded week                   | week.test.ts hasEarlierWeek boundary + Dashboard.test.tsx:AS-025
 
 ## Declared out of scope
 [N/A] BM.NA.public-dashboard-admin — dashboard has no viewer-dependent behaviour   | owner: —
