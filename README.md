@@ -66,8 +66,10 @@ To stop without losing anything, leave `-v` off.
 
 Compiled images rather than mounted source, `RAILS_ENV=production`, a standalone Next build, and neither container running as root.
 
+Same `.env`, real values in it. On the machine you deploy to, that file is the one you create anyway:
+
 ```bash
-cat > .env.prod <<'ENV'
+cat > .env <<'ENV'
 POSTGRES_PASSWORD=<choose one>
 SECRET_KEY_BASE=<openssl rand -hex 64>
 JWT_SECRET=<openssl rand -hex 32>
@@ -75,16 +77,15 @@ CORS_ORIGINS=https://your-domain
 NEXT_PUBLIC_API_BASE_URL=https://api.your-domain
 ENV
 
-docker compose -f docker-compose.prod.yml --env-file .env.prod up --build
+docker compose -f docker-compose.prod.yml up --build
 ```
 
-Every one of those is required — the stack refuses to start without them rather than quietly falling back to a development default.
+Compose reads `.env` on its own, so there is no `--env-file` to remember. Every one of those values is required — the stack refuses to start without them rather than quietly falling back to a development default.
 
 Migrations run on boot here too. Seeding stays manual, and on a real deployment you would usually skip it entirely — it exists to make a review possible, not to populate a production database:
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.prod \
-  exec api ./bin/rails db:seed
+docker compose -f docker-compose.prod.yml exec api ./bin/rails db:seed
 ```
 
 Two things worth knowing. `NEXT_PUBLIC_API_BASE_URL` is compiled into the browser bundle, so changing it means rebuilding rather than restarting. And TLS redirection is on by default, so add `FORCE_SSL=false` if you are exercising this over plain `http://localhost`.
