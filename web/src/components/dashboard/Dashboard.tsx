@@ -55,9 +55,21 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
       {error ? (
         <p
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="flex items-start gap-2 rounded-[--radius] border border-negative/25 bg-negative-surface px-4 py-3 text-sm text-negative"
         >
-          The figures could not be loaded: {error}
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="mt-0.5 size-4 shrink-0"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v5M12 16h.01" />
+          </svg>
+          <span>The figures could not be loaded: {error}</span>
         </p>
       ) : null}
 
@@ -80,7 +92,7 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
         ) : null}
 
         {loading && !data ? (
-          <div className="h-96 animate-pulse rounded-xl bg-neutral-100" />
+          <div className="h-96 animate-pulse rounded-[--radius-lg] bg-surface-sunken" />
         ) : null}
       </div>
     </main>

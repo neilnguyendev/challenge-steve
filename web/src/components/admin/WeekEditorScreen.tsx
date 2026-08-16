@@ -38,8 +38,8 @@ export function WeekEditorScreen() {
       <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Trading figures</h1>
-            <p className="mt-1 text-sm text-neutral-500">
+            <h1 className="text-xl font-semibold tracking-tight text-text">Trading figures</h1>
+            <p className="mt-1 text-sm text-text-muted">
               All seven days are saved together.
             </p>
           </div>
@@ -47,7 +47,7 @@ export function WeekEditorScreen() {
             {/* Carries the week across, so switching views does not lose it. */}
             <a
               href={`/?week=${weekStart}`}
-              className="text-neutral-600 underline underline-offset-4"
+              className="inline-flex min-h-11 items-center rounded-[--radius-sm] px-2 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
             >
               View dashboard
             </a>
@@ -57,7 +57,7 @@ export function WeekEditorScreen() {
                 clearToken();
                 router.replace("/admin/login");
               }}
-              className="text-neutral-600 underline underline-offset-4"
+              className="inline-flex min-h-11 cursor-pointer items-center rounded-[--radius-sm] px-2 text-text-muted underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
             >
               Sign out
             </button>

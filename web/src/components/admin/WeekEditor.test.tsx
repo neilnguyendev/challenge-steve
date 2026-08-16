@@ -128,12 +128,39 @@ describe("AS-022: an invalid entry", () => {
 
     await user.click(screen.getByRole("button", { name: /save week/i }));
 
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("2026-08-14");
-    expect(alert).toHaveTextContent(/labour cost/i);
+    await screen.findByRole("alert");
+
+    // The refusal is attached to the box that caused it, not left as a banner
+    // the reader has to translate into "which of twenty-eight inputs".
+    const offending = screen.getByLabelText("Labour Costs 2026-08-14");
+    expect(offending).toHaveAttribute("aria-invalid", "true");
+    expect(offending).toHaveAccessibleDescription(/labour cost/i);
+    expect(offending).toHaveFocus();
+
+    // Untouched fields are not marked.
+    expect(screen.getByLabelText("Labour Costs 2026-08-13")).not.toHaveAttribute(
+      "aria-invalid",
+    );
 
     // Nothing was confirmed as saved.
     expect(screen.queryByText(/week saved/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps an unrecognised refusal as a banner rather than swallowing it", async () => {
+    const user = userEvent.setup();
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
+    await screen.findByLabelText("POS Revenue 2026-08-10");
+
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      json: async () => ({
+        error: "these dates fall outside the week beginning 2026-08-10",
+      }),
+    });
+    await user.click(screen.getByRole("button", { name: /save week/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/fall outside the week/i);
   });
 
   it("does not overwrite the table with a partially applied week", async () => {

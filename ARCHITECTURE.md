@@ -64,6 +64,15 @@ src/
 
 **All API access goes through `lib/api.ts`.** Base URL, error shape and cache policy are decided once there. A component that calls `fetch` directly is a bug.
 
+**Visual system.** Colour, spacing and radius are CSS custom properties in `globals.css`, exposed to Tailwind through `@theme inline` so components name intent (`text-text-muted`, `bg-surface-sunken`) rather than a shade. There are two palettes — light and dark — and the dark one is not a filter over the light one: the chart in particular carries its own, because near-black bars disappear on a dark surface.
+
+Two rules the tokens exist to keep:
+
+- **Every text step clears 4.5:1 against its surface.** `slate-600` and `emerald-600` do not, which is why the muted and positive tokens are a step darker than the shades usually reached for. Checked by measuring rendered colour in a real browser, not by eye.
+- **Colour never carries meaning alone.** A change against last week is green or red *and* signed; a refused figure is outlined *and* described in text beside the field it belongs to.
+
+The public dashboard deliberately tracks the client's prototype — its chart colours, its borderless summary cards, its bracketed percentages. The admin pages have no prototype to answer to and are designed on the token system alone.
+
 **Package manager: pnpm**, with the version named by `packageManager` in `package.json`. pnpm 10 reads that field and switches itself to match, so any pnpm 10.x on a developer's machine behaves as the pinned one — no Corepack involved, which matters because Node stopped bundling Corepack at v25.
 
 Two consequences worth knowing: `npm install` here produces a lockfile the Docker build will not match, and pnpm blocks dependency install scripts by default — a package that needs one has to be listed under `pnpm.onlyBuiltDependencies`, or it fails silently at runtime rather than at install.

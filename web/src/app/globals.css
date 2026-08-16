@@ -1,26 +1,133 @@
 @import "tailwindcss";
 
+/*
+ * Minimalism / Swiss: a neutral slate ramp, one accent, and figures that line
+ * up in a column. Colour carries emphasis, never meaning on its own — every
+ * green or red in this app is paired with a sign, an arrow or a word.
+ *
+ * Light is the default because the figures are read in a venue office during
+ * the day, and because the client's prototype is light. Dark is supported, not
+ * an afterthought: the chart carries its own palette for it.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Surfaces, lightest to most recessed */
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f1f5f9;
+  --surface-hover: #f8fafc;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Text. Each step is checked against --surface at 4.5:1 or better. */
+  --text: #0f172a;         /* 17.4:1 */
+  --text-muted: #475569;   /*  7.5:1 — secondary labels */
+  --text-subtle: #64748b;  /*  4.8:1 — the lightest text allowed on a surface */
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --accent: #0f172a;
+  --on-accent: #ffffff;
+
+  /* slate-600 / emerald-600 fail 4.5:1 as text on white; these are the first
+     steps that pass, which is why they are 700 rather than the usual 600. */
+  --positive: #047857;
+  --negative: #b91c1c;
+  --positive-surface: #ecfdf5;
+  --negative-surface: #fef2f2;
+
+  --ring: #0f172a;
+
+  --grid: #e2e8f0;
+  --axis-text: #64748b;
+
+  --radius-sm: 0.5rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --surface: #0b1220;
+    --surface-raised: #131c2e;
+    --surface-sunken: #131c2e;
+    --surface-hover: #1a2438;
+
+    --text: #f1f5f9;         /* 15.8:1 on --surface */
+    --text-muted: #cbd5e1;   /*  10.5:1 */
+    --text-subtle: #94a3b8;  /*   5.9:1 */
+
+    --border: #26304a;
+    --border-strong: #3b4763;
+
+    --accent: #f1f5f9;
+    --on-accent: #0b1220;
+
+    /* Lighter steps here: on a dark surface the 700s fall below 4.5:1. */
+    --positive: #34d399;
+    --negative: #f87171;
+    --positive-surface: #052e22;
+    --negative-surface: #3b0d0d;
+
+    --ring: #f1f5f9;
+
+    --grid: #26304a;
+    --axis-text: #94a3b8;
   }
 }
 
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-positive-surface: var(--positive-surface);
+  --color-negative-surface: var(--negative-surface);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  /* Was hardcoded to Arial by the generator, which meant the Geist fonts were
+     downloaded on every page load and then never used. */
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * One focus treatment for the whole app. :focus-visible rather than :focus so
+ * a mouse click does not leave a ring behind, and an offset so the ring is not
+ * swallowed by the control it belongs to.
+ */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Figures line up in a column wherever they are compared. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

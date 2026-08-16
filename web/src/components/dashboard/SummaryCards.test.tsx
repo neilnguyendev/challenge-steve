@@ -90,6 +90,21 @@ describe("AS-008: a decrease", () => {
       "down",
     );
   });
+
+  it("states the direction in text, not in colour alone", () => {
+    // WCAG: colour must not be the only carrier. The leading sign is text, so
+    // the figure still reads correctly in greyscale or with colour blindness.
+    render(
+      <SummaryCards
+        summary={summary({
+          total_revenue: { current: 13000, previous: 14982, delta_pct: -13.2 },
+        })}
+        compareMode
+      />,
+    );
+
+    expect(screen.getByTestId("delta-Total Revenue")).toHaveTextContent("-");
+  });
 });
 
 describe("AS-009: no baseline to compare against", () => {

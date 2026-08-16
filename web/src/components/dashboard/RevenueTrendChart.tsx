@@ -14,14 +14,14 @@ import type { RevenueTrend } from "@/lib/api";
 
 import { toChartRows, isEmptyWeek, type VisibleSeries } from "./chart-data";
 import {
-  GRID_COLOR,
-  SERIES_COLOR,
   SERIES_KEYS,
   Y_AXIS_TICKS,
   seriesLabel,
+  type ChartPalette,
   type Period,
   type SeriesKey,
 } from "./chart-theme";
+import { useChartPalette } from "./useChartPalette";
 import { ChartTooltip } from "./ChartTooltip";
 
 interface RevenueTrendChartProps {
@@ -48,11 +48,13 @@ export function RevenueTrendChart({
   width,
   height = 360,
 }: RevenueTrendChartProps) {
+  const palette = useChartPalette();
+
   if (isEmptyWeek(data)) {
     return (
       <div
         role="status"
-        className="flex h-64 items-center justify-center rounded-xl border border-dashed border-neutral-200 text-sm text-neutral-500"
+        className="flex h-64 items-center justify-center rounded-[--radius-lg] border border-dashed border-border text-sm text-text-subtle"
       >
         No data for this period
       </div>
@@ -70,38 +72,38 @@ export function RevenueTrendChart({
       barGap={2}
       barCategoryGap="18%"
     >
-      <CartesianGrid stroke={GRID_COLOR} strokeDasharray="4 4" vertical={false} />
+      <CartesianGrid stroke={palette.grid} strokeDasharray="4 4" vertical={false} />
       <XAxis
         dataKey="weekday"
         tickLine={false}
         axisLine={false}
-        tick={{ fill: "#737373", fontSize: 12 }}
+        tick={{ fill: palette.axisText, fontSize: 12 }}
       />
       <YAxis
         ticks={Y_AXIS_TICKS}
         domain={[0, Y_AXIS_TICKS[Y_AXIS_TICKS.length - 1]]}
         tickLine={false}
         axisLine={false}
-        tick={{ fill: "#737373", fontSize: 12 }}
+        tick={{ fill: palette.axisText, fontSize: 12 }}
         tickFormatter={(value: number) => `${value / 1000}k`}
       />
       <Tooltip
-        cursor={{ fill: "rgba(0,0,0,0.04)" }}
-        content={<ChartTooltip compareMode={compareMode} />}
+        cursor={{ fill: "color-mix(in srgb, currentColor 6%, transparent)" }}
+        content={<ChartTooltip compareMode={compareMode} palette={palette} />}
       />
 
       {/* Current period: revenue components share a stack, labour stands alone. */}
-      <Bar dataKey="pos" stackId="current" fill={SERIES_COLOR.current.pos} radius={0} />
+      <Bar dataKey="pos" stackId="current" fill={palette.series.current.pos} radius={0} />
       <Bar
         dataKey="eatclub"
         stackId="current"
-        fill={SERIES_COLOR.current.eatclub}
+        fill={palette.series.current.eatclub}
         radius={[3, 3, 0, 0]}
       />
       <Bar
         dataKey="labour"
         stackId="labourCurrent"
-        fill={SERIES_COLOR.current.labour}
+        fill={palette.series.current.labour}
         radius={[3, 3, 0, 0]}
       />
 
@@ -111,7 +113,7 @@ export function RevenueTrendChart({
         <Bar
           dataKey="previousPos"
           stackId="previous"
-          fill={SERIES_COLOR.previous.pos}
+          fill={palette.series.previous.pos}
           radius={0}
         />
       ) : null}
@@ -119,7 +121,7 @@ export function RevenueTrendChart({
         <Bar
           dataKey="previousEatclub"
           stackId="previous"
-          fill={SERIES_COLOR.previous.eatclub}
+          fill={palette.series.previous.eatclub}
           radius={[3, 3, 0, 0]}
         />
       ) : null}
@@ -127,7 +129,7 @@ export function RevenueTrendChart({
         <Bar
           dataKey="previousLabour"
           stackId="labourPrevious"
-          fill={SERIES_COLOR.previous.labour}
+          fill={palette.series.previous.labour}
           radius={[3, 3, 0, 0]}
         />
       ) : null}
@@ -139,7 +141,7 @@ export function RevenueTrendChart({
       <div style={{ height }}>
         {width ? chart : <ResponsiveContainer width="100%" height="100%">{chart}</ResponsiveContainer>}
       </div>
-      <ChartLegend compareMode={compareMode} visibleSeries={visibleSeries} />
+      <ChartLegend compareMode={compareMode} visibleSeries={visibleSeries} palette={palette} />
     </figure>
   );
 }
@@ -147,9 +149,11 @@ export function RevenueTrendChart({
 function ChartLegend({
   compareMode,
   visibleSeries,
+  palette,
 }: {
   compareMode: boolean;
   visibleSeries: VisibleSeries;
+  palette: ChartPalette;
 }) {
   const periods: Period[] = compareMode ? ["current", "previous"] : ["current"];
 
@@ -157,7 +161,7 @@ function ChartLegend({
     SERIES_KEYS.filter((key) => visibleSeries[key]).map((key) => ({
       key: `${period}-${key}`,
       label: seriesLabel(key, compareMode ? period : undefined),
-      color: SERIES_COLOR[period][key as SeriesKey],
+      color: palette.series[period][key as SeriesKey],
     })),
   );
 
@@ -167,7 +171,7 @@ function ChartLegend({
         {entries.map((entry) => (
           <li
             key={entry.key}
-            className="flex items-center gap-2 text-sm text-neutral-700"
+            className="flex items-center gap-2 text-sm text-text-muted"
           >
             <span
               aria-hidden

@@ -1,5 +1,5 @@
 /**
- * Every colour and label the dashboard uses, in one place.
+ * Every colour and label the chart uses, in one place.
  *
  * Labels compose from three metric names and a period suffix rather than being
  * six hard-coded strings, so the two periods cannot drift apart. This is a
@@ -30,24 +30,44 @@ export function seriesLabel(key: SeriesKey, period?: Period): string {
   return `${METRIC_LABEL[key]} (${period === "current" ? "Current" : "Previous"})`;
 }
 
+export type ChartPalette = {
+  series: Record<Period, Record<SeriesKey, string>>;
+  grid: string;
+  axisText: string;
+};
+
 /**
- * Current period reads solid; the previous period is the same hue desaturated,
- * so the eye reads it as "the same thing, earlier" rather than a new metric.
+ * Concrete hex rather than CSS variables.
+ *
+ * Recharts writes these straight onto the SVG, and Export PNG serialises that
+ * SVG on its own — a `var(--…)` would have nothing to resolve against in the
+ * exported file and every bar would come out unpainted.
+ *
+ * The previous period is the same hue desaturated, so the eye reads it as "the
+ * same thing, earlier" rather than as a new metric.
  */
-export const SERIES_COLOR: Record<Period, Record<SeriesKey, string>> = {
-  current: {
-    pos: "#262626",
-    eatclub: "#5b5bef",
-    labour: "#f2711c",
+export const CHART_PALETTE: Record<"light" | "dark", ChartPalette> = {
+  // Light matches the client's prototype swatch for swatch: near-black POS,
+  // periwinkle Eatclub, orange labour, each echoed pale for the previous week.
+  light: {
+    series: {
+      current: { pos: "#262626", eatclub: "#5b5bef", labour: "#f2711c" },
+      previous: { pos: "#b8b8b8", eatclub: "#c3c3f7", labour: "#f8cbb0" },
+    },
+    grid: "#e5e5e5",
+    axisText: "#737373",
   },
-  previous: {
-    pos: "#b8b8b8",
-    eatclub: "#c3c3f7",
-    labour: "#f8cbb0",
+  dark: {
+    // Near-black bars vanish on a dark surface, so the current period lifts to
+    // a light slate and the previous period drops behind it instead.
+    series: {
+      current: { pos: "#e2e8f0", eatclub: "#818cf8", labour: "#fb923c" },
+      previous: { pos: "#475569", eatclub: "#3730a3", labour: "#7c2d12" },
+    },
+    grid: "#26304a",
+    axisText: "#94a3b8",
   },
 };
 
 /** Fixed so two different weeks are comparable by eye, not just by number. */
 export const Y_AXIS_TICKS = [0, 750, 1500, 2250, 3000];
-
-export const GRID_COLOR = "#e5e5e5";

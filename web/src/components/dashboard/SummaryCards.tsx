@@ -48,33 +48,38 @@ function SummaryCard({
   compareMode: boolean;
 }) {
   const delta = formatDelta(figure.delta_pct);
+  const rising = (figure.delta_pct ?? 0) >= 0;
 
   return (
-    <article className="rounded-xl bg-neutral-100 px-5 py-4">
-      <h2 className="text-sm text-neutral-500">{label}</h2>
+    <article className="flex flex-col gap-1 rounded-[--radius-lg] bg-surface-sunken px-5 py-4">
+      <h2 className="text-sm text-text-muted">{label}</h2>
 
-      <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
-        <span className="text-2xl font-semibold tabular-nums text-neutral-900">
+      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span className="tabular text-2xl font-semibold tracking-tight text-text">
           {format(figure.current)}
         </span>
 
         {compareMode && figure.previous !== null ? (
-          <span className="text-sm text-neutral-500">
-            vs <span className="tabular-nums">{format(figure.previous)}</span>
+          <span className="text-sm text-text-subtle">
+            vs <span className="tabular">{format(figure.previous)}</span>
           </span>
         ) : null}
 
         {/* Absent, not zero: with no baseline there is no change to report, and
-            "0%" would claim the week was flat. */}
+            "0%" would claim the week was flat.
+
+            Styled as the prototype has it — plain coloured text in brackets.
+            Colour is not the only signal even so: the leading + or - states the
+            direction in text, so the meaning survives greyscale and colour
+            blindness without an extra icon. */}
         {compareMode && delta ? (
           <span
             data-testid={`delta-${label}`}
-            data-direction={figure.delta_pct! >= 0 ? "up" : "down"}
-            className={
-              figure.delta_pct! >= 0
-                ? "text-sm font-medium tabular-nums text-emerald-600"
-                : "text-sm font-medium tabular-nums text-red-600"
-            }
+            data-direction={rising ? "up" : "down"}
+            className={[
+              "tabular text-sm font-medium",
+              rising ? "text-positive" : "text-negative",
+            ].join(" ")}
           >
             ({delta})
           </span>

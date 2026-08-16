@@ -2,11 +2,19 @@
 
 import { formatMoney } from "@/lib/format";
 
-import { SERIES_COLOR, SERIES_KEYS, seriesLabel } from "./chart-theme";
+import {
+  CHART_PALETTE,
+  SERIES_KEYS,
+  seriesLabel,
+  type ChartPalette,
+} from "./chart-theme";
 import type { ChartRow } from "./chart-data";
 
 interface ChartTooltipProps {
   compareMode: boolean;
+  /** Defaults to light: Recharts clones this element, and a tooltip that
+   *  crashed for want of a prop would take the whole chart with it. */
+  palette?: ChartPalette;
   /** Supplied by Recharts. */
   active?: boolean;
   payload?: Array<{ payload: ChartRow }>;
@@ -26,14 +34,19 @@ const ROWS = [
  * Each row shows that segment's own value — the Eatclub row of a $2,070 bar
  * reads $320, never $2,070.
  */
-export function ChartTooltip({ compareMode, active, payload }: ChartTooltipProps) {
+export function ChartTooltip({
+  compareMode,
+  palette = CHART_PALETTE.light,
+  active,
+  payload,
+}: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const row = payload[0].payload;
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2 shadow-sm">
-      <p className="mb-1.5 text-xs font-medium text-neutral-500">
+    <div className="rounded-[--radius-sm] border border-border bg-surface-raised px-3 py-2 shadow-lg shadow-black/5">
+      <p className="mb-1.5 text-xs font-medium text-text-subtle">
         {row.weekday} {row.date}
       </p>
 
@@ -46,7 +59,7 @@ export function ChartTooltip({ compareMode, active, payload }: ChartTooltipProps
               id: `current-${key}`,
               label: seriesLabel(key, compareMode ? "current" : undefined),
               value: row[field] as number,
-              color: SERIES_COLOR.current[key],
+              color: palette.series.current[key],
             });
           }
 
@@ -55,7 +68,7 @@ export function ChartTooltip({ compareMode, active, payload }: ChartTooltipProps
               id: `previous-${key}`,
               label: seriesLabel(key, "previous"),
               value: row[previousField] as number,
-              color: SERIES_COLOR.previous[key],
+              color: palette.series.previous[key],
             });
           }
 
@@ -67,8 +80,8 @@ export function ChartTooltip({ compareMode, active, payload }: ChartTooltipProps
               className="size-2.5 rounded-full"
               style={{ backgroundColor: line.color }}
             />
-            <span className="text-neutral-600">{line.label}</span>
-            <span className="ml-auto pl-4 font-medium tabular-nums text-neutral-900">
+            <span className="text-text-muted">{line.label}</span>
+            <span className="tabular ml-auto pl-4 font-medium text-text">
               {formatMoney(line.value)}
             </span>
           </li>

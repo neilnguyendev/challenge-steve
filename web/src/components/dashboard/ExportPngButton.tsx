@@ -48,12 +48,26 @@ export function ExportPngButton({
       <button
         type="button"
         onClick={handleClick}
-        className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border-strong px-4 text-sm font-medium text-text transition-colors duration-150 hover:bg-surface-hover"
       >
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-4"
+        >
+          <path d="M12 3v12" />
+          <path d="m7 12 5 5 5-5" />
+          <path d="M5 21h14" />
+        </svg>
         Export PNG
       </button>
       {error ? (
-        <span role="alert" className="text-sm text-red-700">
+        <span role="alert" className="text-sm text-negative">
           {error}
         </span>
       ) : null}

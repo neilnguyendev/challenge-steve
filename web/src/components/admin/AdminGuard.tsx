@@ -33,7 +33,7 @@ export function AdminGuard({ onRedirect, currentPath, children }: AdminGuardProp
 
   if (state === "checking") {
     return (
-      <p className="p-8 text-sm text-neutral-500" role="status">
+      <p className="p-8 text-sm text-text-muted" role="status">
         Checking your session…
       </p>
     );
