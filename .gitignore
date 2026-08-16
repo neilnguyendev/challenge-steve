@@ -1,6 +1,10 @@
-# Secrets and local config
-.env
-.env.local
+# Secrets and local config.
+#
+# Deny every .env variant and allow back only the committed template. Listing
+# names one at a time loses to whoever invents .env.uat next week — and the
+# file that gets missed is the one holding real credentials.
+.env*
+!.env.example
 *.pem
 *.key
 
@@ -16,7 +20,6 @@
 /web/node_modules/
 /web/.next/
 /web/out/
-/web/.env.local
 /web/next-env.d.ts
 
 # Playwright
@@ -32,6 +35,3 @@
 .idea/
 .vscode/
 *.swp
-
-# Local-only env for exercising the production stack
-.env.prod.local
