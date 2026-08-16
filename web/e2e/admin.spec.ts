@@ -29,6 +29,21 @@ test("the dashboard offers a way into the admin area", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Trading figures" })).toBeVisible();
 });
 
+test("admin pages are distinguishable from the public one by title alone", async ({
+  page,
+}) => {
+  // A manager with several tabs open should be able to tell them apart from
+  // the tab strip, without clicking through to look.
+  await page.goto("/");
+  await expect(page).toHaveTitle("Revenue Trend Dashboard");
+
+  await page.goto("/admin/login");
+  await expect(page).toHaveTitle("Admin · Sign in · Revenue Trend Dashboard");
+
+  await page.goto("/admin/trading-days");
+  await expect(page).toHaveTitle("Admin · Trading figures · Revenue Trend Dashboard");
+});
+
 test("an admin page cannot be reached without signing in", async ({ page }) => {
   await page.goto("/admin/trading-days");
 
