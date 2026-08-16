@@ -1,0 +1,100 @@
+# Derived from revenue-trend-dashboard.md (Phase 0.6). One line per spec promise.
+# States: [ ] untouched · [x] done (test + code) · [~] partial (needs destination) · [N/A] out of scope
+
+## Pre-stories (specs in docs/tasks/, built before the spec stories)
+[x] BE05-AS-1  — no-compare response: 7 series entries, previous_period null      | revenue_trend_spec.rb:BE05-AS-1 returns seven days and no previous period
+[x] BE05-AS-2  — compare response: previous_period, delta_pct, symmetric fields   | revenue_trend_spec.rb:BE05-AS-2 reports both periods / same field names
+[x] BE05-AS-3  — previous week empty: previous 0, delta_pct null, no raise        | revenue_trend_spec.rb:BE05-AS-3 reports zero rather than dividing by it
+[x] BE05-AS-4  — missing day still present, zero-filled                           | revenue_trend_spec.rb:BE05-AS-4 still appears, zero-filled
+[x] BE05-AS-5  — week_start not a Monday refused with named reason                | revenue_trend_spec.rb:BE05-AS-5 refuses a Tuesday / unreadable date
+[x] BE05-AS-6  — average_per_day divides by 7, not by populated days              | revenue_trend_spec.rb:BE05-AS-6 ignores how many days actually traded
+[x] BE05-AS-7  — admin change visible on next read                                | revenue_trend_spec.rb:BE05-AS-7 serves the new figure on the next read
+[x] BE05-AS-8  — available_range spans all recorded trading                       | revenue_trend_spec.rb:BE05-AS-8 earliest and latest, not the requested week
+[x] BE05-AS-9  — available_range null when nothing recorded                       | revenue_trend_spec.rb:BE05-AS-9 empty range but still seven days
+[x] BE05-R1    — series[] carries no total_revenue field                          | revenue_trend_spec.rb:BE05-R1 no per-day total alongside its components
+[ ] FE04-AS-1  — default mode: 2 bars/day, POS+Eatclub stacked, Labour solid      | owner: FE-04
+[ ] FE04-AS-2  — compare mode: 4 bars/day, 6 symmetric legend entries             | owner: FE-04
+[ ] FE04-AS-3  — previous stack totals 1840, not 3360                             | owner: FE-04
+[ ] FE04-AS-4  — hiding a series keeps remaining bars in place                    | owner: FE-04
+[ ] FE04-AS-5  — Y axis ticks stay fixed regardless of data max                   | owner: FE-04
+[ ] FE04-AS-6  — all-zero week renders empty state, no throw                      | owner: FE-04
+[ ] FE04-AS-7  — admin value reflected in bar height                              | owner: FE-04
+[ ] FE04-AS-8  — tooltip: 6 rows, segment value not cumulative                    | owner: FE-04
+
+## S-001 Choose what the chart shows
+[ ] AS-001.T1 — heading reads "This Week's Revenue Trend"                         | owner: S-001
+[ ] AS-001.T2 — current week Mon..Sun requested and shown                         | owner: S-001
+[ ] AS-001.T3 — all three series visible by default                               | owner: S-001
+[ ] AS-002.T1 — heading gains "vs Previous Period"                                | owner: S-001
+[ ] AS-002.T2 — comparison refetches with compare=true                            | owner: S-001
+[ ] AS-002.T3 — toggle shows active state                                         | owner: S-001
+[ ] AS-003.T1 — unticking a series marks it hidden                                | owner: S-001
+[ ] AS-003.T2 — no API request follows a series toggle                            | owner: S-001
+[ ] AS-004.T1 — earlier week refetched                                            | owner: S-001
+[ ] AS-004.T2 — comparison setting survives the week change                       | owner: S-001
+[ ] AS-005.T1 — unreachable API reports failure                                   | owner: S-001
+[ ] AS-005.T2 — controls stay usable after failure                                | owner: S-001
+[ ] AS-025    — back control unavailable at earliest recorded week                | owner: S-001
+[ ] BM.AS-001.dashboard — week-has-figures / visitor / dashboard                   | owner: S-001
+[ ] BM.AS-002.dashboard — comparing / visitor / dashboard                          | owner: S-001
+[ ] BM.AS-025.dashboard — earliest week / visitor / dashboard                      | owner: S-001
+
+## S-002 Read the week's headline figures
+[ ] AS-006.T1 — three figures, no comparison text                                 | owner: S-002
+[ ] AS-006.T2 — average = total / 7 = 2425                                        | owner: S-002
+[ ] AS-007.T1 — "current vs previous (+x%)" rendered                              | owner: S-002
+[ ] AS-007.T2 — increase styled as increase                                       | owner: S-002
+[ ] AS-008    — decrease reads -13.2% and is styled distinguishably               | owner: S-002
+[ ] AS-009    — null delta: previous $0, no percentage at all                     | owner: S-002
+[ ] BM.AS-007.dashboard — comparing / visitor / summary cards                      | owner: S-002
+[ ] BM.AS-009.dashboard — previous-week-untraded / visitor / dashboard             | owner: S-002
+
+## S-003 Admin signs in and privileged calls are gated
+[ ] AS-010    — correct credentials return a token + email                        | owner: S-003
+[ ] AS-011    — wrong password refused, message names neither field               | owner: S-003
+[ ] AS-012    — privileged call without token refused, no data                    | owner: S-003
+[ ] AS-013    — token signed elsewhere refused, no data                           | owner: S-003
+[ ] AS-026    — token older than 24h refused identically to absent                | owner: S-003
+[ ] BM.AS-012.admin-api — any / visitor / admin API                                | owner: S-003
+[ ] BM.AS-026.admin-api — expired session / admin / admin API                      | owner: S-003
+
+## S-004 The figures for a week can be saved
+[ ] AS-014    — list returns 7 days in order, untraded ones zero                  | owner: S-004
+[ ] AS-015    — bulk save replaces an existing day, no duplicate row              | owner: S-004
+[ ] AS-016    — same save records a day that had none                             | owner: S-004
+[ ] AS-017    — one bad figure abandons the whole save, others unchanged          | owner: S-004
+[ ] AS-027    — unauthenticated save refused AND nothing written                  | owner: S-004
+[ ] BM.AS-014.week-editor — partly-traded / admin / week editor                    | owner: S-004
+
+## S-005 Signing in from the browser
+[ ] AS-018    — sign-in keeps session and lands on the editor                     | owner: S-005
+[ ] AS-019    — wrong credentials: message shown, email kept, no session          | owner: S-005
+[ ] AS-020    — admin URL without session redirects, then returns to target       | owner: S-005
+[ ] BM.AS-020.admin-pages — any / visitor / admin pages                            | owner: S-005
+
+## S-006 Editing a week and seeing it on the dashboard
+[ ] AS-021    — SEAM (real API+DB): save 2000 → chart column and card both move   | owner: S-006
+[ ] AS-022    — invalid entry reported, other days untouched, failure signalled   | owner: S-006
+[ ] AS-023    — untraded days listed as zero and editable                         | owner: S-006
+[ ] BM.AS-021.editor-to-dashboard — week editor → dashboard parity                 | owner: S-006
+
+## S-007 Export the chart as an image (P2)
+[ ] AS-024    — export reflects current view, dashboard left unchanged            | owner: S-007
+
+## Constraints
+[ ] C-001     — admin-only across list, save, browser pages                       | owner: S-003,S-004,S-005
+[ ] C-002     — total revenue derived, never stored                               | owner: S-002,S-004
+[ ] C-003     — no caching between admin save and dashboard read                  | owner: S-001,S-006
+[ ] C-004     — money on the wire as whole-AUD integers                           | owner: S-002,S-004
+[ ] C-005     — week saved whole or not at all                                    | owner: S-004,S-006
+[ ] C-006     — 24h session, expired behaves as absent                            | owner: S-003
+[ ] C-007     — cannot page earlier than earliest recorded week                   | owner: S-001
+
+## Declared out of scope
+[N/A] BM.NA.public-dashboard-admin — dashboard has no viewer-dependent behaviour   | owner: —
+[N/A] event-impact-markers  — dropped from the brief                              | owner: —
+[N/A] analysis-tabs         — brief asks for one view                             | owner: —
+[N/A] multi-venue-switcher  — one seeded venue                                    | owner: —
+[N/A] live-updates          — reload is the stated mechanism                      | owner: —
+[N/A] mobile-below-1024px   — desktop only                                        | owner: —
+[N/A] password-reset        — no trigger in the brief                             | owner: —

@@ -22,7 +22,9 @@ module Api
       end
 
       def render_unprocessable(error)
-        render json: { error: error.message }, status: :unprocessable_entity
+        # :unprocessable_content, not :unprocessable_entity — Rack deprecated the
+        # old name. Same 422 either way.
+        render json: { error: error.message }, status: :unprocessable_content
       end
     end
   end
