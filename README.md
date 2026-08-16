@@ -38,13 +38,19 @@ docker info >/dev/null && echo "Docker is running"
 
 ## Quick start
 
-From a clean checkout, three commands:
+Four lines from nothing to a running app:
 
 ```bash
-git clone <repository-url> challenge-steve
+git clone git@github.com:neilnguyendev/challenge-steve.git
 cd challenge-steve
 cp .env.example .env
 docker compose up --build
+```
+
+No SSH key on this machine? Use HTTPS instead of the first line:
+
+```bash
+git clone https://github.com/neilnguyendev/challenge-steve.git
 ```
 
 The first build takes roughly 3–5 minutes: it downloads the Ruby and Node base images, installs gems and installs pnpm packages. Later starts take seconds.
@@ -424,4 +430,12 @@ docker compose build --no-cache api
 | [`docs/explore/revenue-trend-dashboard.md`](docs/explore/revenue-trend-dashboard.md) | Requirements analysis, decisions made with the client, open questions, estimate |
 | [`docs/tasks/BE-05-revenue-trend-endpoint.md`](docs/tasks/BE-05-revenue-trend-endpoint.md) | API contract and acceptance criteria for the aggregation endpoint |
 | [`docs/tasks/FE-04-revenue-trend-chart.md`](docs/tasks/FE-04-revenue-trend-chart.md) | Chart component spec and acceptance criteria |
+| [`docs/specs/revenue-trend-dashboard/`](docs/specs/revenue-trend-dashboard/) | The feature spec the build was driven from — 7 stories, 27 acceptance scenarios, 7 constraints |
+| [`docs/adr/`](docs/adr/) | Why the six decisions that shape this codebase were made, and what they cost |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Codebase shape, conventions, invariants |
+
+Reading them in that order — requirements, tickets, spec, decisions, architecture — follows how the project was actually built.
+
+### One deliberate difference from the brief
+
+The chart legend does not use the prototype's previous-period labels. The prototype names them `Direct Revenue` and `Total Revenue` while naming the current period `POS Revenue` and `Eatclub Revenue` — two different naming schemes in one legend, where the second one labels a segment after a running total. Confirmed with the client, then changed. [ADR-0006](docs/adr/0006-symmetrical-chart-labels.md) has the reasoning.
