@@ -70,11 +70,12 @@ Same `.env` file as development — on the machine you deploy to, that is the on
 
 ```bash
 cp .env.example .env
-$EDITOR .env
+
+# Now open .env and set the production values listed below.
+# Build only once you have.
+
 docker compose -f docker-compose.prod.yml up --build
 ```
-
-Compose reads `.env` on its own, so there is no `--env-file` to remember.
 
 **What must change before this is safe:**
 
