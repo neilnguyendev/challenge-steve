@@ -236,6 +236,59 @@ describe("the view lives in the URL", () => {
   });
 });
 
+describe("a database with nothing in it", () => {
+  function respondEmpty() {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: "No venue configured" }),
+    });
+  }
+
+  it("explains itself rather than reporting a failure", async () => {
+    respondEmpty();
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+
+    expect(await screen.findByText(/no figures yet/i)).toBeInTheDocument();
+    // Nothing recorded is the state every fresh install starts in — it is not
+    // an error, and must not be dressed as one.
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("offers the action that belongs to the reader", async () => {
+    respondEmpty();
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+
+    await screen.findByText(/no figures yet/i);
+    expect(screen.getByRole("link", { name: /enter figures/i })).toHaveAttribute(
+      "href",
+      "/admin/trading-days",
+    );
+  });
+
+  it("keeps setup instructions off the screen", async () => {
+    // A venue manager has no shell and no repository. Container commands are
+    // README content; they leaked here once already.
+    respondEmpty();
+    const { container } = render(<Dashboard fallbackWeekStart={WEEK} />);
+
+    await screen.findByText(/no figures yet/i);
+    expect(container.textContent).not.toMatch(/docker|rails|db:seed|bundle/i);
+  });
+
+  it("still reports a genuine failure as one", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: "Internal Server Error" }),
+    });
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not/i);
+    expect(screen.queryByText(/no figures yet/i)).not.toBeInTheDocument();
+  });
+});
+
 describe("reaching the admin area", () => {
   it("offers a way in from the dashboard, aimed at the editor", async () => {
     render(<Dashboard fallbackWeekStart={WEEK} />);

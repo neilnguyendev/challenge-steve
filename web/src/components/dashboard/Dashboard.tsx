@@ -52,21 +52,21 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
         chartRef={chartRef}
       />
 
-      {/* No figures recorded yet. Every fresh install starts here, so it says
-          what to do rather than reporting a failure. */}
+      {/* No figures recorded yet. Every fresh install starts here, so it offers
+          the way forward rather than reporting a failure.
+
+          Deliberately says nothing about seeding: that is a setup command for
+          whoever installs this, and it has no business on a screen a venue
+          manager looks at. It lives in the README. */}
       {empty ? (
-        <section className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border px-6 py-14 text-center">
+        <section className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border px-6 py-16 text-center">
           <h2 className="text-base font-semibold text-text">No figures yet</h2>
-          <p className="max-w-md text-sm text-text-muted">
-            Nothing has been recorded for this venue. Load the sample week, or
-            sign in and enter the figures yourself.
+          <p className="max-w-sm text-sm text-text-muted">
+            Nothing has been recorded for this week.
           </p>
-          <code className="rounded-control bg-surface-sunken px-3 py-2 text-xs text-text-muted">
-            docker compose exec api bundle exec rails db:seed
-          </code>
           <a
             href="/admin/trading-days"
-            className="mt-1 inline-flex min-h-11 items-center rounded-full bg-accent px-5 text-sm font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
+            className="mt-2 inline-flex min-h-11 items-center rounded-full bg-accent px-5 text-sm font-semibold text-on-accent transition-opacity duration-150 hover:opacity-90"
           >
             Enter figures
           </a>
