@@ -16,7 +16,7 @@ function summary(
   };
 }
 
-describe("AS-006: three figures with no comparison", () => {
+describe("AS-006 / C-004: three figures with no comparison", () => {
   it("shows each figure once, with no comparison text", () => {
     render(<SummaryCards summary={summary()} compareMode={false} />);
 

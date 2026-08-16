@@ -177,7 +177,7 @@ RSpec.describe "GET /api/v1/revenue_trend" do
     end
   end
 
-  describe "BE05-R1: the payload shape" do
+  describe "BE05-R1 / C-002: the payload shape carries no stored total" do
     it "does not carry a per-day total alongside its components" do
       record_week(week, pos: 1_000, eatclub: 200)
 

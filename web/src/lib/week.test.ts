@@ -36,7 +36,7 @@ describe("shiftWeeks", () => {
   });
 });
 
-describe("hasEarlierWeek", () => {
+describe("C-007: hasEarlierWeek bounds backward navigation", () => {
   it("is true while recorded trading reaches into an earlier week", () => {
     expect(hasEarlierWeek("2026-08-10", "2026-08-03")).toBe(true);
   });

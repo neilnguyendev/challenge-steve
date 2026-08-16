@@ -1,5 +1,8 @@
 "use client";
 
+import type { RefObject } from "react";
+
+import { ExportPngButton } from "./ExportPngButton";
 import {
   METRIC_LABEL,
   SERIES_COLOR,
@@ -17,6 +20,7 @@ interface DashboardHeaderProps {
   onToggleCompare: () => void;
   onToggleSeries: (key: SeriesKey) => void;
   onChangeWeek: (weeks: number) => void;
+  chartRef: RefObject<HTMLElement | null>;
 }
 
 export function DashboardHeader({
@@ -28,6 +32,7 @@ export function DashboardHeader({
   onToggleCompare,
   onToggleSeries,
   onChangeWeek,
+  chartRef,
 }: DashboardHeaderProps) {
   const title = compareMode
     ? "This Week's Revenue Trend vs Previous Period"
@@ -74,6 +79,12 @@ export function DashboardHeader({
           >
             Compare to Previous
           </button>
+
+          <ExportPngButton
+            chartRef={chartRef}
+            weekStart={weekStart}
+            compareMode={compareMode}
+          />
         </div>
       </div>
 

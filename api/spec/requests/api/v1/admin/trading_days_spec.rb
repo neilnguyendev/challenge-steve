@@ -24,7 +24,7 @@ RSpec.describe "/api/v1/admin/trading_days" do
 
   # ---------------------------------------------------------------- S-003 ----
 
-  describe "AS-012: a privileged call with no token" do
+  describe "AS-012 / C-001: a privileged call with no token" do
     it "is refused and returns no data" do
       create(:trading_day, venue: venue, date: week)
 
@@ -58,7 +58,7 @@ RSpec.describe "/api/v1/admin/trading_days" do
     end
   end
 
-  describe "AS-026: a session older than a day" do
+  describe "AS-026 / C-006: a session older than a day" do
     it "is refused exactly as an absent token is" do
       expired = travel_to(25.hours.ago) { AdminToken.issue(admin) }
 
@@ -135,7 +135,7 @@ RSpec.describe "/api/v1/admin/trading_days" do
     end
   end
 
-  describe "AS-017: one bad figure abandons the entire save" do
+  describe "AS-017 / C-005: one bad figure abandons the entire save" do
     it "names the offending day and leaves every other day untouched" do
       create(:trading_day, venue: venue, date: week + 2, pos_revenue: 1_830)
 

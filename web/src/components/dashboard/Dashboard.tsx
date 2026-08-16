@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { DashboardHeader } from "./DashboardHeader";
 import { RevenueTrendChart } from "./RevenueTrendChart";
@@ -24,6 +24,10 @@ export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
   const [visibleSeries, setVisibleSeries] =
     useState<Record<SeriesKey, boolean>>(ALL_SERIES_VISIBLE);
 
+  // The export reads whatever is inside this element, so it always matches
+  // what the visitor is looking at rather than a re-render of its own.
+  const chartRef = useRef<HTMLDivElement>(null);
+
   const toggleSeries = (key: SeriesKey) =>
     setVisibleSeries((current) => ({ ...current, [key]: !current[key] }));
 
@@ -45,6 +49,7 @@ export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
         onToggleCompare={toggleCompare}
         onToggleSeries={toggleSeries}
         onChangeWeek={goToWeek}
+        chartRef={chartRef}
       />
 
       {error ? (
@@ -64,11 +69,13 @@ export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
         {data ? (
           <>
             <SummaryCards summary={data.summary} compareMode={compareMode} />
-            <RevenueTrendChart
-              data={data}
-              compareMode={compareMode}
-              visibleSeries={visibleSeries}
-            />
+            <div ref={chartRef}>
+              <RevenueTrendChart
+                data={data}
+                compareMode={compareMode}
+                visibleSeries={visibleSeries}
+              />
+            </div>
           </>
         ) : null}
 

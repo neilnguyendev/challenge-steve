@@ -115,6 +115,46 @@ export interface RevenueTrend {
   series: SeriesEntry[];
 }
 
+/** One editable row in the admin week editor. */
+export interface EditableDay extends DayFigures {
+  date: string;
+  weekday: string;
+}
+
+export interface AdminWeek {
+  venue_id: number;
+  week_start: string;
+  days: EditableDay[];
+}
+
+export function fetchAdminWeek(
+  weekStart: string,
+  headers: Record<string, string>,
+): Promise<AdminWeek> {
+  return apiFetch<AdminWeek>(
+    `/api/v1/admin/trading_days?week_start=${weekStart}`,
+    { headers },
+  );
+}
+
+/**
+ * Saves all seven days at once. The API applies them in one transaction, so a
+ * single bad figure leaves the whole week as it was.
+ */
+export function saveAdminWeek(
+  week: { week_start: string; days: EditableDay[] },
+  headers: Record<string, string>,
+): Promise<AdminWeek> {
+  return apiFetch<AdminWeek>("/api/v1/admin/trading_days", {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      week_start: week.week_start,
+      days: week.days.map(({ date, ...figures }) => ({ date, ...figures })),
+    }),
+  });
+}
+
 export function fetchRevenueTrend(options: {
   weekStart: string;
   compare: boolean;
