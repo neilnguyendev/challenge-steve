@@ -34,7 +34,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-First build takes 3–5 minutes; later starts take seconds. Migrations and seeds run automatically — the API container's entrypoint applies them before the server boots.
+First build takes 3–5 minutes; later starts take seconds.
+
+The API container's entrypoint prepares the database before the server boots. Migrations run every time; **the seed runs only when the database is first created**, so restarting never overwrites figures you have entered. To get the demo data back, delete the volume — `docker compose down -v`.
 
 | | URL |
 |---|---|
