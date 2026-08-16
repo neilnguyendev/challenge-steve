@@ -1,0 +1,347 @@
+# Revenue Trend Dashboard
+
+A weekly revenue dashboard for a hospitality venue, with an admin area for entering the underlying figures.
+
+- **`api/`** — Rails 7.1, API-only, PostgreSQL
+- **`web/`** — Next.js 16, App Router, TypeScript, Tailwind, Recharts
+
+Everything runs in Docker. You do not need Ruby, Node or PostgreSQL on your machine.
+
+---
+
+## Prerequisites
+
+Exactly one thing:
+
+| | Version | Check with |
+|---|---|---|
+| Docker Desktop / OrbStack / Docker Engine | 24 or newer, with Compose v2 | `docker compose version` |
+
+**Install if you don't have it:**
+
+```bash
+# macOS
+brew install --cask docker        # or: brew install orbstack
+
+# Ubuntu / Debian
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker "$USER"   # then log out and back in
+```
+
+Start Docker and confirm it's running:
+
+```bash
+docker info >/dev/null && echo "Docker is running"
+```
+
+---
+
+## Quick start
+
+From a clean checkout, three commands:
+
+```bash
+git clone <repository-url> challenge-steve
+cd challenge-steve
+cp .env.example .env
+docker compose up --build
+```
+
+The first build takes roughly 3–5 minutes: it downloads the Ruby and Node base images, installs gems and installs pnpm packages. Later starts take seconds.
+
+**Wait for these two lines**, which mean each service is ready:
+
+```
+api-1  | [entrypoint] preparing database ...
+api-1  | * Listening on http://0.0.0.0:3000
+web-1  | ✓ Ready in 2.1s
+```
+
+Then open:
+
+| | URL |
+|---|---|
+| Dashboard | http://localhost:3000 |
+| API | http://localhost:3001/api/v1/venues |
+| API health check | http://localhost:3001/up |
+| PostgreSQL | `localhost:5433` |
+
+The database is created, migrated and seeded automatically on first boot — there is no separate setup step to remember.
+
+### Admin credentials
+
+Created by the seed:
+
+```
+Email:    admin@example.com
+Password: password123
+```
+
+Change them by editing `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` in `.env` before the first `docker compose up`, or see *Reset the database* below.
+
+### Stopping
+
+```bash
+docker compose down          # stop, keep the data
+docker compose down -v       # stop and delete the database volume
+```
+
+---
+
+## What the seed gives you
+
+One venue, **three consecutive weeks** of trading data ending with the current week, and one admin user.
+
+Three weeks is deliberate: the dashboard's *Compare to Previous* mode needs a week plus the week before it, so a two-week seed would leave the comparison empty on the oldest week you can reach.
+
+Older weeks are seeded slightly below the current one, so the comparison shows a positive change rather than a flat 0%.
+
+---
+
+## Ports
+
+Defaults chosen to avoid collisions with things you may already run. Change them in `.env`.
+
+| Service | Container | Host | Env var |
+|---|---|---|---|
+| `web` | 3000 | **3000** | `WEB_PORT` |
+| `api` | 3000 | **3001** | `API_PORT` |
+| `db` | 5432 | **5433** | `DB_PORT` |
+
+`DB_PORT` defaults to 5433 rather than 5432 specifically so a PostgreSQL already installed on your machine keeps working.
+
+---
+
+## Environment variables
+
+`cp .env.example .env` gives you working defaults for local development; every value in it is safe to commit-free and non-secret. The file is documented inline. The ones worth knowing:
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_BASE_URL` | Where the **browser** reaches the API. Must be a host address (`http://localhost:3001`), not the container name — this code runs in the user's browser, which knows nothing about the Docker network. |
+| `CORS_ORIGINS` | Comma-separated origins the API accepts browser calls from. Must include wherever `web` is served. |
+| `JWT_SECRET` | Signs admin session tokens. Generate a real one with `openssl rand -hex 32`. |
+| `DATABASE_URL` | Assembled by `docker-compose.yml` from the `POSTGRES_*` values. Set it yourself only when running outside Docker. |
+
+---
+
+## Everyday commands
+
+All of these run against the running containers.
+
+### Tests
+
+```bash
+docker compose exec api bundle exec rspec      # backend
+docker compose exec web pnpm test               # frontend
+```
+
+To run a single file or example:
+
+```bash
+docker compose exec api bundle exec rspec spec/models/trading_day_spec.rb
+docker compose exec api bundle exec rspec spec/models/trading_day_spec.rb:12
+docker compose exec web pnpm exec vitest run src/lib/api.test.ts
+```
+
+### Database
+
+```bash
+# Apply new migrations (also runs automatically on container start)
+docker compose exec api bundle exec rails db:migrate
+
+# Re-run the seed
+docker compose exec api bundle exec rails db:seed
+
+# Rails console
+docker compose exec api bundle exec rails console
+
+# psql
+docker compose exec db psql -U revenue -d revenue_development
+```
+
+### Reset the database
+
+Wipes everything and rebuilds from migrations plus seed:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+### Logs
+
+```bash
+docker compose logs -f          # everything
+docker compose logs -f api      # one service
+```
+
+### After changing dependencies
+
+Editing `api/Gemfile` or `web/package.json` needs a rebuild — the install step is baked into the image layer:
+
+```bash
+docker compose up --build
+```
+
+---
+
+## Project layout
+
+```
+.
+├── docker-compose.yml       # db + api + web
+├── .env.example             # copy to .env
+│
+├── api/                     # Rails 7.1, API-only
+│   ├── app/
+│   │   ├── controllers/api/v1/
+│   │   │   ├── base_controller.rb    # shared error envelope
+│   │   │   └── venues_controller.rb
+│   │   ├── models/          # Venue, TradingDay, AdminUser
+│   │   └── services/        # query objects (aggregation lives here)
+│   ├── db/
+│   │   ├── migrate/
+│   │   └── seeds.rb
+│   ├── spec/                # RSpec
+│   ├── Dockerfile.dev
+│   └── bin/docker-dev-entrypoint
+│
+├── web/                     # Next.js 16
+│   ├── src/
+│   │   ├── app/             # App Router pages
+│   │   └── lib/api.ts       # the only place that talks to the API
+│   ├── vitest.config.mts
+│   └── Dockerfile.dev
+│
+└── docs/
+    ├── explore/             # requirements analysis, open questions
+    └── tasks/               # per-ticket specs with acceptance criteria
+```
+
+---
+
+## Data model
+
+```
+venues        (id, name, timezone)
+trading_days  (id, venue_id, date, pos_revenue, eatclub_revenue,
+               labour_cost, covers)          -- unique (venue_id, date)
+admin_users   (id, email, password_digest)
+```
+
+One `trading_days` row is one venue's day of trading. Two facts about it are worth knowing before you read the code:
+
+**Total revenue is never stored.** It is always `pos_revenue + eatclub_revenue`, computed when the API responds. A stored total is a second source of truth that eventually disagrees with the first.
+
+**Money is whole AUD, not cents.** The venue records takings to the dollar and every figure on the dashboard renders without decimals. If sub-dollar precision is ever needed, `db/migrate/20260816000002_create_trading_days.rb` is the place to revisit.
+
+A missing row means the venue did not trade that day. The API returns such days zero-filled, so the chart always receives seven days and never has to guard against gaps.
+
+---
+
+## A deliberate difference from the prototype
+
+The prototype labels the previous-period bars **`Direct Revenue (Previous)`** and **`Total Revenue (Previous)`**, while labelling the current-period bars `POS Revenue` and `Eatclub Revenue`.
+
+Those are inconsistent with each other. Per the client: `POS = Direct`, and `POS + Eatclub = Total`. So the upper segment of the previous-period bar is **Eatclub revenue**, not total revenue — the prototype names it after the running total instead of after the segment.
+
+This implementation uses symmetrical labels across both periods:
+
+| Prototype | Here |
+|---|---|
+| `Direct Revenue (Previous)` | `POS Revenue (Previous)` |
+| `Total Revenue (Previous)` | `Eatclub Revenue (Previous)` |
+
+Confirmed with the client before implementing. Full reasoning in [`docs/explore/revenue-trend-dashboard.md`](docs/explore/revenue-trend-dashboard.md).
+
+---
+
+## Running without Docker
+
+Only worth it if you want a faster edit-reload loop. You will need Ruby 3.2.2, Node 22.12+ and PostgreSQL 15 installed yourself.
+
+```bash
+# 1. Database — start just the db container and use it from the host
+docker compose up -d db
+
+# 2. API
+cd api
+bundle install
+export DATABASE_URL=postgres://revenue:revenue@localhost:5433/revenue_development
+bundle exec rails db:prepare
+bundle exec rails server -p 3001
+
+# 3. Frontend, in another terminal
+cd web
+nvm use                      # reads .nvmrc → Node 24
+npm install -g pnpm          # any pnpm 10.x; it self-adjusts to packageManager
+pnpm install
+echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:3001" > .env.local
+pnpm dev
+```
+
+**Node 22.12 or newer is required**, not merely recommended: the test environment (jsdom 27) calls `require()` on ES modules, which earlier versions cannot do.
+
+---
+
+## Troubleshooting
+
+**`bind: address already in use`**
+
+Something already holds the port. Either stop it, or change `WEB_PORT` / `API_PORT` / `DB_PORT` in `.env` and run `docker compose up` again.
+
+```bash
+lsof -i :3000        # find what is holding it (macOS/Linux)
+```
+
+**The dashboard loads but says "Could not reach the API"**
+
+The browser, not the container, makes that call. Check that `NEXT_PUBLIC_API_BASE_URL` in `.env` points at a **host** address (`http://localhost:3001`) and not at `http://api:3000`. `NEXT_PUBLIC_*` values are baked in when the frontend starts, so restart `web` after changing them:
+
+```bash
+docker compose restart web
+```
+
+**CORS errors in the browser console**
+
+`CORS_ORIGINS` must contain the exact origin serving the frontend, including scheme and port. If you changed `WEB_PORT`, update `CORS_ORIGINS` to match, then `docker compose restart api`.
+
+**`PG::ConnectionBad` on startup**
+
+The API waits for PostgreSQL, so this usually means the database volume is in a bad state. Rebuild it:
+
+```bash
+docker compose down -v && docker compose up --build
+```
+
+**Changes to `Gemfile` or `package.json` seem to be ignored**
+
+Dependencies are installed into the image, not the mounted source. Rebuild: `docker compose up --build`.
+
+**API returns 403 to the frontend but works fine in `curl`**
+
+Rails' host authorisation. Server-rendered pages call the API as `http://api:3000`, so the request arrives with `Host: api`, which Rails rejects in development unless allowed. `ALLOWED_HOSTS` (default `api`) covers this. If you renamed the `api` service in `docker-compose.yml`, add the new name:
+
+```bash
+ALLOWED_HOSTS=api,my-new-name docker compose up
+```
+
+**Build fails on `pg` native extension**
+
+The image installs `build-essential` and `libpq-dev` for exactly this. A failure here almost always means a partial build cache — clear it:
+
+```bash
+docker compose build --no-cache api
+```
+
+---
+
+## Documentation
+
+| Document | What's in it |
+|---|---|
+| [`docs/explore/revenue-trend-dashboard.md`](docs/explore/revenue-trend-dashboard.md) | Requirements analysis, decisions made with the client, open questions, estimate |
+| [`docs/tasks/BE-05-revenue-trend-endpoint.md`](docs/tasks/BE-05-revenue-trend-endpoint.md) | API contract and acceptance criteria for the aggregation endpoint |
+| [`docs/tasks/FE-04-revenue-trend-chart.md`](docs/tasks/FE-04-revenue-trend-chart.md) | Chart component spec and acceptance criteria |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Codebase shape, conventions, invariants |

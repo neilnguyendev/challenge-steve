@@ -1,0 +1,23 @@
+source "https://rubygems.org"
+
+ruby "3.2.2"
+
+gem "rails", "~> 7.1.2"
+gem "pg", "~> 1.1"
+gem "puma", ">= 5.0"
+
+# Browser calls come from the Next.js origin, so CORS is not optional here.
+gem "rack-cors"
+
+# Admin authentication: bcrypt hashes the password, jwt carries the session.
+gem "bcrypt", "~> 3.1.7"
+gem "jwt", "~> 2.8"
+
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "bootsnap", require: false
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ]
+  gem "rspec-rails", "~> 6.1"
+  gem "factory_bot_rails", "~> 6.4"
+end

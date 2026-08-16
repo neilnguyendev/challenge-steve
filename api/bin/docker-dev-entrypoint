@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DB_HOST="${DB_HOST:-db}"
+
+# compose already gates on the db healthcheck, but this keeps the container
+# correct when started on its own.
+until pg_isready --host="$DB_HOST" --port=5432 --quiet; do
+  echo "[entrypoint] waiting for postgres at ${DB_HOST}:5432 ..."
+  sleep 1
+done
+
+# A stale pid file from an unclean shutdown stops Puma from booting.
+rm -f tmp/pids/server.pid
+
+# db:prepare creates the database if it is missing, runs any pending
+# migrations, and loads seeds only on first creation — so restarts are cheap
+# and never clobber data the admin has entered.
+echo "[entrypoint] preparing database ..."
+bundle exec rails db:prepare
+
+# The README tells people to run `docker compose exec api bundle exec rspec`.
+# Without this, the first such run after a fresh volume fails on a missing
+# revenue_test database.
+#
+# db:test:prepare, not `RAILS_ENV=test db:prepare` — the latter also loads
+# seeds, and demo data in the test database makes specs pass or fail for
+# reasons that have nothing to do with the code.
+if [ "${RAILS_ENV:-development}" = "development" ]; then
+  echo "[entrypoint] preparing test database ..."
+  bundle exec rails db:test:prepare
+fi
+
+exec "$@"

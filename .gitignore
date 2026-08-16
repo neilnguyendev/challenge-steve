@@ -1,0 +1,29 @@
+# Secrets and local config
+.env
+.env.local
+*.pem
+*.key
+
+# Rails
+/api/tmp/
+/api/log/
+/api/storage/
+/api/.bundle/
+/api/vendor/bundle/
+/api/config/master.key
+
+# Next.js
+/web/node_modules/
+/web/.next/
+/web/out/
+/web/.env.local
+/web/next-env.d.ts
+
+# Docker volumes
+/.docker-data/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

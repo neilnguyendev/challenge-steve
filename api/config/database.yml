@@ -1,0 +1,19 @@
+# Every environment reads DATABASE_URL, which docker-compose supplies.
+# Running outside Docker? Export it yourself, for example:
+#   export DATABASE_URL=postgres://revenue:revenue@localhost:5433/revenue_development
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  url: <%= ENV["DATABASE_URL"] %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  # Same server, separate database, so a test run never truncates dev data.
+  url: <%= ENV["DATABASE_URL"] ? ENV["DATABASE_URL"].sub(%r{/[^/]+$}, "/revenue_test") : nil %>
+
+production:
+  <<: *default

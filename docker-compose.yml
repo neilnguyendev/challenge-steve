@@ -1,0 +1,81 @@
+name: challenge-steve
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-revenue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-revenue}
+      POSTGRES_DB: ${POSTGRES_DB:-revenue_development}
+    ports:
+      # Host port defaults to 5433 so it never collides with a local Postgres.
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-revenue} -d ${POSTGRES_DB:-revenue_development}",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    environment:
+      RAILS_ENV: ${RAILS_ENV:-development}
+      DATABASE_URL: postgres://${POSTGRES_USER:-revenue}:${POSTGRES_PASSWORD:-revenue}@db:5432/${POSTGRES_DB:-revenue_development}
+      JWT_SECRET: ${JWT_SECRET:-dev_only_change_me_0000000000000000000000000000000000000000000000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      # Server-rendered pages call the API as http://api:3000, so Rails must
+      # accept `Host: api` in development.
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-api}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-password123}
+    ports:
+      - "${API_PORT:-3001}:3000"
+    volumes:
+      - ./api:/app
+      # Keep installed gems out of the bind mount so a host checkout does not
+      # shadow them.
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/up || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    environment:
+      # Read by the browser, not by the container — must be a host address.
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3001}
+      # Used by server components, which run inside this container and reach
+      # the API over the Docker network instead.
+      API_INTERNAL_URL: http://api:3000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - ./web:/app
+      # Anonymous volumes: keep container-built artefacts from being clobbered
+      # by the bind mount above.
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  pgdata:
+  bundle_cache:
