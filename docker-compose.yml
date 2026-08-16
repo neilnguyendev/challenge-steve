@@ -24,6 +24,11 @@ services:
       start_period: 5s
 
   api:
+    # No `command:` here on purpose — the image's entrypoint
+    # (api/bin/docker-dev-entrypoint) waits for Postgres, runs `rails db:prepare`
+    # to create/migrate/seed, prepares the test database, and only then starts
+    # the server. Putting it there rather than in a compose `command` means it
+    # also runs for `docker compose run api …` and for a plain `docker run`.
     build:
       context: ./api
       dockerfile: Dockerfile.dev

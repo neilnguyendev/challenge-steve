@@ -68,7 +68,34 @@ Then open:
 | API health check | http://localhost:3001/up |
 | PostgreSQL | `localhost:5433` |
 
-The database is created, migrated and seeded automatically on first boot — there is no separate setup step to remember.
+### Where the database setup happens
+
+There is no separate migrate step to run, and that is deliberate — but it does mean the work is not visible in `docker-compose.yml`, so here is where it lives.
+
+The `api` image's entrypoint, [`api/bin/docker-dev-entrypoint`](api/bin/docker-dev-entrypoint), runs before the server every time the container starts:
+
+1. Waits for PostgreSQL to accept connections.
+2. Runs `rails db:prepare` — creates the database if it is missing, applies any pending migrations, and loads `db/seeds.rb` **only on first creation**, so a restart never overwrites figures an admin has entered.
+3. Runs `rails db:test:prepare`, so `bundle exec rspec` works straight away rather than failing on a missing test database.
+4. Hands over to the server.
+
+You can watch it happen:
+
+```
+api-1  | [entrypoint] waiting for postgres at db:5432 ...
+api-1  | [entrypoint] preparing database ...
+api-1  | [entrypoint] preparing test database ...
+api-1  | * Listening on http://0.0.0.0:3000
+```
+
+It sits in the entrypoint rather than a compose `command:` so it also runs for `docker compose run api …` and for a plain `docker run` — anything that starts the image gets a prepared database, not just `docker compose up`.
+
+**After adding a migration**, restarting the container is enough:
+
+```bash
+docker compose restart api          # entrypoint re-runs db:prepare
+docker compose exec api bundle exec rails db:migrate   # or apply it directly
+```
 
 ### Try the whole loop in a minute
 
@@ -153,7 +180,7 @@ All of these run against the running containers.
 
 ```bash
 docker compose exec api bundle exec rspec      # backend  — 38 examples
-docker compose exec web pnpm test              # frontend — 81 tests
+docker compose exec web pnpm test              # frontend — 102 tests
 ```
 
 To run a single file or example:
@@ -184,7 +211,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-Eight checks: getting into the admin area from the dashboard, the sign-in guard, the wrong-password path, the admin-to-dashboard round trip in a real browser, and a layout regression guard that asserts the page does not change width when comparison is switched on.
+Twelve checks: getting into the admin area from the dashboard, the sign-in guard, the wrong-password path, the admin-to-dashboard round trip in a real browser, and a layout regression guard that asserts the page does not change width when comparison is switched on.
 
 ```bash
 pnpm exec playwright test e2e/admin.spec.ts    # one file
