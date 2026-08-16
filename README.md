@@ -72,13 +72,15 @@ The database is created, migrated and seeded automatically on first boot — the
 
 ### Try the whole loop in a minute
 
-1. Open the **dashboard** and note the Total Revenue figure.
+1. Open the **dashboard** at http://localhost:3000 and note the Total Revenue figure.
 2. Press **Compare to Previous** — the chart gains the previous week's bars and each card gains a change against it.
-3. Sign in at **/admin/login** with the credentials below.
-4. Change Wednesday's POS Revenue in the week editor and press **Save week**.
-5. Go back to the dashboard. Wednesday's bar and the Total Revenue card have both moved by exactly what you typed.
+3. Click **Edit figures** (top right, under the controls). You are not signed in, so you land on the sign-in page; use the credentials below.
+4. You arrive at the week editor you asked for. Change Wednesday's POS Revenue and press **Save week**.
+5. Click **View dashboard**. Wednesday's bar and the Total Revenue card have both moved by exactly what you typed.
 
 Step 5 is what the whole project is for, and it has a test of its own — see *Tests* below.
+
+The admin area is reachable from the dashboard rather than only by URL, and the sign-in page remembers where you were headed, so step 3 finishes the journey instead of dropping you on a default page.
 
 ### Admin credentials
 
@@ -182,7 +184,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-Seven checks: the sign-in guard, the wrong-password path, the admin-to-dashboard round trip in a real browser, and a layout regression guard that asserts the page does not change width when comparison is switched on.
+Eight checks: getting into the admin area from the dashboard, the sign-in guard, the wrong-password path, the admin-to-dashboard round trip in a real browser, and a layout regression guard that asserts the page does not change width when comparison is switched on.
 
 ```bash
 pnpm exec playwright test e2e/admin.spec.ts    # one file

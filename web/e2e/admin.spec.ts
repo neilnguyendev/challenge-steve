@@ -10,6 +10,25 @@ async function signIn(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: /sign in/i }).click();
 }
 
+test("the dashboard offers a way into the admin area", async ({ page }) => {
+  // Discoverability: without this link the only way in is knowing the URL.
+  await page.goto("/");
+  await page.waitForSelector(".recharts-wrapper");
+
+  await page.getByRole("link", { name: /edit figures/i }).click();
+
+  // Not signed in, so the guard steps in and remembers the destination.
+  await expect(page).toHaveURL(/\/admin\/login\?next=%2Fadmin%2Ftrading-days/);
+
+  await page.getByLabel("Email").fill(EMAIL);
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: /sign in/i }).click();
+
+  // ... and the journey finishes where it started out for.
+  await expect(page).toHaveURL(/\/admin\/trading-days/);
+  await expect(page.getByRole("heading", { name: "Trading figures" })).toBeVisible();
+});
+
 test("an admin page cannot be reached without signing in", async ({ page }) => {
   await page.goto("/admin/trading-days");
 

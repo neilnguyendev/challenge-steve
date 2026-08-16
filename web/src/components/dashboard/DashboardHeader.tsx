@@ -110,6 +110,16 @@ export function DashboardHeader({
         >
           →
         </button>
+
+        {/* Points at the editor rather than the sign-in page: someone already
+            signed in lands where they meant to go, and someone who is not gets
+            sent to sign in and then brought back here. */}
+        <a
+          href="/admin/trading-days"
+          className="ml-auto rounded-md px-2 py-1 underline underline-offset-4 hover:text-neutral-900"
+        >
+          Edit figures
+        </a>
       </div>
     </header>
   );

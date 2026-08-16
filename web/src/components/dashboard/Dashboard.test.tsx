@@ -150,6 +150,20 @@ describe("AS-005: the API being unavailable", () => {
   });
 });
 
+describe("reaching the admin area", () => {
+  it("offers a way in from the dashboard, aimed at the editor", async () => {
+    render(<Dashboard initialWeekStart={WEEK} />);
+    await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
+
+    // Aimed at the editor, not the sign-in page: the guard redirects anyone
+    // without a session and returns them here afterwards.
+    expect(screen.getByRole("link", { name: /edit figures/i })).toHaveAttribute(
+      "href",
+      "/admin/trading-days",
+    );
+  });
+});
+
 describe("AS-025: browsing backwards stops at the earliest recorded week", () => {
   it("disables the earlier-week control once there is nothing before it", async () => {
     fetchMock.mockResolvedValue({
