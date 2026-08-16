@@ -8,7 +8,7 @@ import {
   type EditableDay,
 } from "@/lib/api";
 import { authHeaders } from "@/lib/auth";
-import { currentMonday, formatWeekRange, shiftWeeks } from "@/lib/week";
+import { formatWeekRange } from "@/lib/week";
 
 const FIGURES = [
   { field: "pos_revenue", label: "POS Revenue" },
@@ -25,8 +25,12 @@ type Status =
   | { kind: "saved" }
   | { kind: "failed"; message: string };
 
-export function WeekEditor({ initialWeekStart = currentMonday() }: { initialWeekStart?: string }) {
-  const [weekStart, setWeekStart] = useState(initialWeekStart);
+interface WeekEditorProps {
+  weekStart: string;
+  onChangeWeek: (weeks: number) => void;
+}
+
+export function WeekEditor({ weekStart, onChangeWeek }: WeekEditorProps) {
   const [days, setDays] = useState<EditableDay[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -99,7 +103,7 @@ export function WeekEditor({ initialWeekStart = currentMonday() }: { initialWeek
         <button
           type="button"
           aria-label="Earlier week"
-          onClick={() => setWeekStart((week) => shiftWeeks(week, -1))}
+          onClick={() => onChangeWeek(-1)}
           className="rounded-md border border-neutral-200 px-2 py-1"
         >
           ←
@@ -108,7 +112,7 @@ export function WeekEditor({ initialWeekStart = currentMonday() }: { initialWeek
         <button
           type="button"
           aria-label="Later week"
-          onClick={() => setWeekStart((week) => shiftWeeks(week, 1))}
+          onClick={() => onChangeWeek(1)}
           className="rounded-md border border-neutral-200 px-2 py-1"
         >
           →

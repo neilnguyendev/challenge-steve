@@ -42,7 +42,7 @@ afterEach(() => {
 
 describe("AS-023: a week with untraded days", () => {
   it("lists all seven days with zeros where nothing was traded", async () => {
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
 
     await screen.findByLabelText("POS Revenue 2026-08-10");
 
@@ -55,7 +55,7 @@ describe("AS-023: a week with untraded days", () => {
 
   it("lets an untraded day be filled in", async () => {
     const user = userEvent.setup();
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
 
     const thursday = await screen.findByLabelText("POS Revenue 2026-08-13");
     await user.clear(thursday);
@@ -65,7 +65,7 @@ describe("AS-023: a week with untraded days", () => {
   });
 
   it("sends the session token when loading the week", async () => {
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
     await screen.findByLabelText("POS Revenue 2026-08-10");
 
     const [, init] = fetchMock.mock.calls[0];
@@ -76,7 +76,7 @@ describe("AS-023: a week with untraded days", () => {
 describe("AS-021: saving sends the whole week", () => {
   it("submits all seven days in one request, carrying the edit", async () => {
     const user = userEvent.setup();
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
 
     const wednesday = await screen.findByLabelText("POS Revenue 2026-08-12");
     await user.clear(wednesday);
@@ -99,7 +99,7 @@ describe("AS-021: saving sends the whole week", () => {
 
   it("confirms the save so the manager knows it landed", async () => {
     const user = userEvent.setup();
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
     await screen.findByLabelText("POS Revenue 2026-08-10");
 
     fetchMock.mockResolvedValueOnce(respondOk(week()));
@@ -112,7 +112,7 @@ describe("AS-021: saving sends the whole week", () => {
 describe("AS-022: an invalid entry", () => {
   it("reports the refusal and leaves the edited value on screen to correct", async () => {
     const user = userEvent.setup();
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
 
     const friday = await screen.findByLabelText("Labour Costs 2026-08-14");
     await user.clear(friday);
@@ -138,7 +138,7 @@ describe("AS-022: an invalid entry", () => {
 
   it("does not overwrite the table with a partially applied week", async () => {
     const user = userEvent.setup();
-    render(<WeekEditor initialWeekStart={WEEK} />);
+    render(<WeekEditor weekStart={WEEK} onChangeWeek={() => {}} />);
 
     const wednesday = await screen.findByLabelText("POS Revenue 2026-08-12");
     await user.clear(wednesday);

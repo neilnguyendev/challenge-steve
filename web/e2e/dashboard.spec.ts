@@ -67,3 +67,39 @@ test("hiding a series removes its bars and its legend entry", async ({ page }) =
   expect(await page.locator(".recharts-rectangle").count()).toBe(drawnBefore - 7);
   expect(await page.locator(".recharts-bar").count()).toBe(seriesBefore);
 });
+
+test("the view is in the URL, so a link and a reload both survive", async ({ page }) => {
+  // Landing bare normalises to the week actually being shown, so copying the
+  // address bar sends one specific week rather than "whatever week you open it".
+  await expect(page).toHaveURL(/\?week=\d{4}-\d{2}-\d{2}$/);
+
+  await page.getByRole("button", { name: /compare to previous/i }).click();
+  await page.getByRole("checkbox", { name: "Labour Costs" }).uncheck();
+
+  await expect(page).toHaveURL(/compare=1/);
+  await expect(page).toHaveURL(/series=pos%2Ceatclub/);
+
+  const shared = page.url();
+  await page.reload();
+  await page.waitForSelector(".recharts-wrapper");
+
+  // Everything comes back: same week, still comparing, Labour still hidden.
+  expect(page.url()).toBe(shared);
+  await expect(
+    page.getByRole("heading", { name: /vs Previous Period/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: "Labour Costs" })).not.toBeChecked();
+  await expect(page.locator("figcaption").getByText(/Labour Costs/)).toHaveCount(0);
+});
+
+test("a hand-edited URL falls back instead of erroring", async ({ page }) => {
+  // The API only serves Monday-anchored weeks; a typo must not surface as an
+  // error the visitor never asked for.
+  await page.goto("/?week=2026-08-11&series=nonsense");
+  await page.waitForSelector(".recharts-wrapper");
+
+  await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
+  for (const label of ["POS Revenue", "Eatclub Revenue", "Labour Costs"]) {
+    await expect(page.getByRole("checkbox", { name: label })).toBeChecked();
+  }
+});

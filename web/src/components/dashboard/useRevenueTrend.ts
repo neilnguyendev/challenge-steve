@@ -1,20 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { fetchRevenueTrend, type RevenueTrend } from "@/lib/api";
-import { shiftWeeks } from "@/lib/week";
 
 /**
- * Owns the week being viewed and whether the previous one is shown alongside it.
+ * Fetches the figures for whatever the URL currently describes.
  *
- * Deliberately does NOT own which series are visible: hiding a series is a
- * display decision the browser already has the data for, and refetching on it
- * would be a wasted round trip the user can see.
+ * Owns no view state of its own — `weekStart` and `compareMode` come from the
+ * address bar via useDashboardView. Which series are visible is deliberately
+ * not a parameter: hiding one changes what is drawn from data already in hand,
+ * and refetching for it would be a round trip the user can see.
  */
-export function useRevenueTrend(initialWeekStart: string) {
-  const [weekStart, setWeekStart] = useState(initialWeekStart);
-  const [compareMode, setCompareMode] = useState(false);
+export function useRevenueTrend(weekStart: string, compareMode: boolean) {
   const [data, setData] = useState<RevenueTrend | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,20 +42,5 @@ export function useRevenueTrend(initialWeekStart: string) {
     };
   }, [weekStart, compareMode]);
 
-  const goToWeek = useCallback(
-    (weeks: number) => setWeekStart((week) => shiftWeeks(week, weeks)),
-    [],
-  );
-
-  const toggleCompare = useCallback(() => setCompareMode((on) => !on), []);
-
-  return {
-    weekStart,
-    compareMode,
-    data,
-    error,
-    loading,
-    goToWeek,
-    toggleCompare,
-  };
+  return { data, error, loading };
 }

@@ -17,8 +17,10 @@ test("the dashboard offers a way into the admin area", async ({ page }) => {
 
   await page.getByRole("link", { name: /edit figures/i }).click();
 
-  // Not signed in, so the guard steps in and remembers the destination.
+  // Not signed in, so the guard steps in and remembers the destination —
+  // including which week the dashboard was showing.
   await expect(page).toHaveURL(/\/admin\/login\?next=%2Fadmin%2Ftrading-days/);
+  await expect(page).toHaveURL(/week%3D\d{4}-\d{2}-\d{2}/);
 
   await page.getByLabel("Email").fill(EMAIL);
   await page.getByLabel("Password").fill(PASSWORD);

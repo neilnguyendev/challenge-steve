@@ -1,11 +1,45 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSyncExternalStore } from "react";
 
 import { Dashboard } from "./Dashboard";
 import type { RevenueTrend } from "@/lib/api";
 
 const WEEK = "2026-08-10";
+
+/**
+ * A working address bar rather than a stub.
+ *
+ * The dashboard keeps its whole view in the URL, so a mock that swallowed
+ * router.replace would leave every interaction test asserting against state
+ * that never changed. This one actually stores what was written and re-renders,
+ * which is also what lets these tests check the URL the component produced.
+ */
+let currentQuery = "";
+const subscribers = new Set<() => void>();
+
+function setQuery(next: string) {
+  currentQuery = next;
+  subscribers.forEach((notify) => notify());
+}
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+  useSearchParams: () =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    new URLSearchParams(
+      useSyncExternalStore(
+        (notify: () => void) => {
+          subscribers.add(notify);
+          return () => subscribers.delete(notify);
+        },
+        () => currentQuery,
+        () => currentQuery,
+      ),
+    ),
+}));
 
 function trend(overrides: Partial<RevenueTrend> = {}): RevenueTrend {
   return {
@@ -40,6 +74,12 @@ function requestedUrls(): string[] {
 }
 
 beforeEach(() => {
+  currentQuery = "";
+  // The component writes through the History API rather than the router, so
+  // that is what the mocked address bar has to listen to.
+  vi.spyOn(window.history, "replaceState").mockImplementation((_s, _t, url) =>
+    setQuery(String(url).split("?")[1] ?? ""),
+  );
   fetchMock = vi.fn().mockResolvedValue({
     ok: true,
     status: 200,
@@ -54,7 +94,7 @@ afterEach(() => {
 
 describe("AS-001: default load shows the current week", () => {
   it("names the week, requests it, and shows every series", async () => {
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
 
     expect(
       await screen.findByRole("heading", { name: "This Week's Revenue Trend" }),
@@ -72,7 +112,7 @@ describe("AS-001: default load shows the current week", () => {
 describe("AS-002: turning on comparison reloads against the previous week", () => {
   it("renames the view, refetches with comparison, and marks the control active", async () => {
     const user = userEvent.setup();
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     const toggle = screen.getByRole("button", { name: /compare to previous/i });
@@ -96,7 +136,7 @@ describe("AS-002: turning on comparison reloads against the previous week", () =
 describe("AS-003: hiding a series updates the chart without refetching", () => {
   it("marks the series hidden and asks the API for nothing further", async () => {
     const user = userEvent.setup();
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     const callsBefore = fetchMock.mock.calls.length;
@@ -113,7 +153,7 @@ describe("AS-003: hiding a series updates the chart without refetching", () => {
 describe("AS-004: moving to an earlier week loads that week", () => {
   it("refetches the earlier week and keeps the comparison setting", async () => {
     const user = userEvent.setup();
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     await user.click(screen.getByRole("button", { name: /compare to previous/i }));
@@ -138,7 +178,7 @@ describe("AS-005: the API being unavailable", () => {
       json: async () => ({ error: "Internal Server Error" }),
     });
 
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/could not/i);
 
@@ -150,16 +190,62 @@ describe("AS-005: the API being unavailable", () => {
   });
 });
 
+describe("the view lives in the URL", () => {
+  it("names the week it is showing, so the link can be sent to someone", async () => {
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+    await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
+
+    await waitFor(() => expect(currentQuery).toContain(`week=${WEEK}`));
+  });
+
+  it("records comparison and hidden series", async () => {
+    const user = userEvent.setup();
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+    await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
+
+    await user.click(screen.getByRole("button", { name: /compare to previous/i }));
+    await user.click(screen.getByRole("checkbox", { name: "Labour Costs" }));
+
+    await waitFor(() => {
+      const query = new URLSearchParams(currentQuery);
+      expect(query.get("compare")).toBe("1");
+      expect(query.get("series")).toBe("pos,eatclub");
+    });
+  });
+
+  it("leaves defaults out, so an untouched view has a plain URL", async () => {
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+    await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
+
+    await waitFor(() => expect(currentQuery).toBe(`week=${WEEK}`));
+  });
+
+  it("opens on whatever the URL describes, not on the defaults", async () => {
+    // Someone following a shared link, or reloading the page.
+    currentQuery = "week=2026-08-03&compare=1&series=labour";
+
+    render(<Dashboard fallbackWeekStart={WEEK} />);
+
+    await screen.findByRole("heading", {
+      name: "This Week's Revenue Trend vs Previous Period",
+    });
+    expect(requestedUrls()[0]).toContain("week_start=2026-08-03");
+    expect(requestedUrls()[0]).toContain("compare=true");
+    expect(screen.getByRole("checkbox", { name: "POS Revenue" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Labour Costs" })).toBeChecked();
+  });
+});
+
 describe("reaching the admin area", () => {
   it("offers a way in from the dashboard, aimed at the editor", async () => {
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     // Aimed at the editor, not the sign-in page: the guard redirects anyone
     // without a session and returns them here afterwards.
     expect(screen.getByRole("link", { name: /edit figures/i })).toHaveAttribute(
       "href",
-      "/admin/trading-days",
+      `/admin/trading-days?week=${WEEK}`,
     );
   });
 });
@@ -173,14 +259,14 @@ describe("AS-025: browsing backwards stops at the earliest recorded week", () =>
         trend({ available_range: { earliest: WEEK, latest: "2026-08-16" } }),
     });
 
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     expect(screen.getByRole("button", { name: /earlier week/i })).toBeDisabled();
   });
 
   it("leaves it enabled while earlier trading exists", async () => {
-    render(<Dashboard initialWeekStart={WEEK} />);
+    render(<Dashboard fallbackWeekStart={WEEK} />);
     await screen.findByRole("heading", { name: "This Week's Revenue Trend" });
 
     expect(screen.getByRole("button", { name: /earlier week/i })).toBeEnabled();

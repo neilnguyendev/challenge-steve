@@ -1,35 +1,35 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import { DashboardHeader } from "./DashboardHeader";
 import { RevenueTrendChart } from "./RevenueTrendChart";
 import { SummaryCards } from "./SummaryCards";
-import { SERIES_KEYS, type SeriesKey } from "./chart-theme";
+import { SERIES_KEYS } from "./chart-theme";
+import { useDashboardView } from "./useDashboardView";
 import { useRevenueTrend } from "./useRevenueTrend";
 import { hasEarlierWeek, hasLaterWeek } from "@/lib/week";
 
-const ALL_SERIES_VISIBLE: Record<SeriesKey, boolean> = {
-  pos: true,
-  eatclub: true,
-  labour: true,
-};
+/**
+ * `fallbackWeekStart` is used only when the URL names no week — it is not
+ * initial state. Everything the visitor chooses lives in the address bar, so
+ * the view survives a reload and a copied link shows what the sender saw.
+ */
+export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) {
+  const {
+    weekStart,
+    compareMode,
+    visibleSeries,
+    goToWeek,
+    toggleCompare,
+    toggleSeries,
+  } = useDashboardView(fallbackWeekStart);
 
-export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
-  const { weekStart, compareMode, data, error, loading, goToWeek, toggleCompare } =
-    useRevenueTrend(initialWeekStart);
-
-  // Series visibility lives here rather than in the hook: it changes what is
-  // drawn, never what is fetched.
-  const [visibleSeries, setVisibleSeries] =
-    useState<Record<SeriesKey, boolean>>(ALL_SERIES_VISIBLE);
+  const { data, error, loading } = useRevenueTrend(weekStart, compareMode);
 
   // The export reads whatever is inside this element, so it always matches
   // what the visitor is looking at rather than a re-render of its own.
   const chartRef = useRef<HTMLDivElement>(null);
-
-  const toggleSeries = (key: SeriesKey) =>
-    setVisibleSeries((current) => ({ ...current, [key]: !current[key] }));
 
   // With no data we do not know the recorded range, so leave navigation open
   // rather than trapping the visitor on a week that failed to load.

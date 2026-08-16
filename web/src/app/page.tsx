@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { currentMonday } from "@/lib/week";
 
@@ -6,5 +8,11 @@ import { currentMonday } from "@/lib/week";
 export const dynamic = "force-dynamic";
 
 export default function Home() {
-  return <Dashboard initialWeekStart={currentMonday()} />;
+  return (
+    // useSearchParams needs a boundary; the dashboard reads its whole view
+    // from the URL rather than holding it in state.
+    <Suspense fallback={null}>
+      <Dashboard fallbackWeekStart={currentMonday()} />
+    </Suspense>
+  );
 }
