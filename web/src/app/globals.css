@@ -43,7 +43,7 @@
      which turns each into a real utility (rounded-control, rounded-card…). */
   --radius-control: 0.75rem;
   --radius-panel: 1rem;
-  --radius-card: 1rem;
+  --radius-card: 1.5rem;
 }
 
 @media (prefers-color-scheme: dark) {

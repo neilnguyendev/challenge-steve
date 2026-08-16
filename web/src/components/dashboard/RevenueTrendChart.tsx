@@ -63,14 +63,25 @@ export function RevenueTrendChart({
 
   const rows = toChartRows(data, compareMode, visibleSeries);
 
+  // The prototype softens every corner, so the foot of a bar is rounded too,
+  // not only its head. A stacked pair splits the job: the lower segment rounds
+  // its base, the upper one its cap. With the upper segment hidden the lower
+  // one is the whole bar, so it rounds all four.
+  const BAR = 6;
+  const base: [number, number, number, number] = visibleSeries.eatclub
+    ? [0, 0, BAR, BAR]
+    : [BAR, BAR, BAR, BAR];
+  const cap: [number, number, number, number] = [BAR, BAR, 0, 0];
+  const alone: [number, number, number, number] = [BAR, BAR, BAR, BAR];
+
   const chart = (
     <BarChart
       data={rows}
       width={width}
       height={height}
       margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
-      barGap={2}
-      barCategoryGap="18%"
+      barGap={3}
+      barCategoryGap="12%"
     >
       <CartesianGrid stroke={palette.grid} strokeDasharray="4 4" vertical={false} />
       <XAxis
@@ -93,18 +104,18 @@ export function RevenueTrendChart({
       />
 
       {/* Current period: revenue components share a stack, labour stands alone. */}
-      <Bar dataKey="pos" stackId="current" fill={palette.series.current.pos} radius={0} />
+      <Bar dataKey="pos" stackId="current" fill={palette.series.current.pos} radius={base} />
       <Bar
         dataKey="eatclub"
         stackId="current"
         fill={palette.series.current.eatclub}
-        radius={[3, 3, 0, 0]}
+        radius={cap}
       />
       <Bar
         dataKey="labour"
         stackId="labourCurrent"
         fill={palette.series.current.labour}
-        radius={[3, 3, 0, 0]}
+        radius={alone}
       />
 
       {/* Previous period. Mounted only when comparing, so the default view is
@@ -114,7 +125,7 @@ export function RevenueTrendChart({
           dataKey="previousPos"
           stackId="previous"
           fill={palette.series.previous.pos}
-          radius={0}
+          radius={base}
         />
       ) : null}
       {compareMode ? (
@@ -122,7 +133,7 @@ export function RevenueTrendChart({
           dataKey="previousEatclub"
           stackId="previous"
           fill={palette.series.previous.eatclub}
-          radius={[3, 3, 0, 0]}
+          radius={cap}
         />
       ) : null}
       {compareMode ? (
@@ -130,7 +141,7 @@ export function RevenueTrendChart({
           dataKey="previousLabour"
           stackId="labourPrevious"
           fill={palette.series.previous.labour}
-          radius={[3, 3, 0, 0]}
+          radius={alone}
         />
       ) : null}
     </BarChart>

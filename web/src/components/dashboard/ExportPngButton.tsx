@@ -48,7 +48,7 @@ export function ExportPngButton({
       <button
         type="button"
         onClick={handleClick}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border-strong px-4 text-sm font-medium text-text transition-colors duration-150 hover:bg-surface-hover"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-border-strong px-5 text-sm font-medium text-text transition-colors duration-150 hover:bg-surface-hover"
       >
         <svg
           aria-hidden

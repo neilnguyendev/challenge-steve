@@ -75,7 +75,7 @@ export function DashboardHeader({
             onClick={onToggleCompare}
             aria-pressed={compareMode}
             className={[
-              "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium",
+              "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-5 text-sm font-medium",
               "transition-colors duration-150",
               compareMode
                 ? "bg-accent text-on-accent"
