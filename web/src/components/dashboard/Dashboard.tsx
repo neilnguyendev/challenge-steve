@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 import { DashboardHeader } from "./DashboardHeader";
+import { RevenueTrendChart } from "./RevenueTrendChart";
+import { SummaryCards } from "./SummaryCards";
 import { SERIES_KEYS, type SeriesKey } from "./chart-theme";
 import { useRevenueTrend } from "./useRevenueTrend";
 import { hasEarlierWeek, hasLaterWeek } from "@/lib/week";
@@ -54,20 +56,26 @@ export function Dashboard({ initialWeekStart }: { initialWeekStart: string }) {
         </p>
       ) : null}
 
-      {/* Placeholder until FE-04 and S-002 land. */}
-      <section
-        aria-busy={loading}
-        className="rounded-xl border border-neutral-200 p-6 text-sm text-neutral-500"
-      >
-        <p data-testid="visible-series">
-          {SERIES_KEYS.filter((key) => visibleSeries[key]).join(",")}
-        </p>
+      <p data-testid="visible-series" className="sr-only">
+        {SERIES_KEYS.filter((key) => visibleSeries[key]).join(",")}
+      </p>
+
+      <div aria-busy={loading} className="flex flex-col gap-8">
         {data ? (
-          <p className="mt-2 tabular-nums">
-            {data.series.length} days loaded for {data.period.start} – {data.period.end}
-          </p>
+          <>
+            <SummaryCards summary={data.summary} compareMode={compareMode} />
+            <RevenueTrendChart
+              data={data}
+              compareMode={compareMode}
+              visibleSeries={visibleSeries}
+            />
+          </>
         ) : null}
-      </section>
+
+        {loading && !data ? (
+          <div className="h-96 animate-pulse rounded-xl bg-neutral-100" />
+        ) : null}
+      </div>
     </main>
   );
 }

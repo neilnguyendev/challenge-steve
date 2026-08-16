@@ -12,14 +12,14 @@
 [x] BE05-AS-8  — available_range spans all recorded trading                       | revenue_trend_spec.rb:BE05-AS-8 earliest and latest, not the requested week
 [x] BE05-AS-9  — available_range null when nothing recorded                       | revenue_trend_spec.rb:BE05-AS-9 empty range but still seven days
 [x] BE05-R1    — series[] carries no total_revenue field                          | revenue_trend_spec.rb:BE05-R1 no per-day total alongside its components
-[ ] FE04-AS-1  — default mode: 2 bars/day, POS+Eatclub stacked, Labour solid      | owner: FE-04
-[ ] FE04-AS-2  — compare mode: 4 bars/day, 6 symmetric legend entries             | owner: FE-04
-[ ] FE04-AS-3  — previous stack totals 1840, not 3360                             | owner: FE-04
-[ ] FE04-AS-4  — hiding a series keeps remaining bars in place                    | owner: FE-04
-[ ] FE04-AS-5  — Y axis ticks stay fixed regardless of data max                   | owner: FE-04
-[ ] FE04-AS-6  — all-zero week renders empty state, no throw                      | owner: FE-04
-[ ] FE04-AS-7  — admin value reflected in bar height                              | owner: FE-04
-[ ] FE04-AS-8  — tooltip: 6 rows, segment value not cumulative                    | owner: FE-04
+[x] FE04-AS-1  — default mode: 2 bars/day, POS+Eatclub stacked, Labour solid      | RevenueTrendChart.test.tsx:FE04-AS-1 three series, no period suffix; chart-data.test.ts previous fields null
+[x] FE04-AS-2  — compare mode: 4 bars/day, 6 symmetric legend entries             | RevenueTrendChart.test.tsx:FE04-AS-2 six symmetrical entries, no Total/Direct Revenue
+[x] FE04-AS-3  — previous stack totals 1840, not 3360                             | chart-data.test.ts:FE04-AS-3 segments 1520+320=1840, never 1840 as a value
+[x] FE04-AS-4  — hiding a series keeps remaining bars in place                    | RevenueTrendChart.test.tsx:FE04-AS-4 legend pair dropped; chart-data.test.ts nulls keep row shape
+[x] FE04-AS-5  — Y axis ticks stay fixed regardless of data max                   | RevenueTrendChart.test.tsx:FE04-AS-5 ticks 0k..3k and all seven weekdays render
+[x] FE04-AS-6  — all-zero week renders empty state, no throw                      | RevenueTrendChart.test.tsx:FE04-AS-6 empty state, no throw; chart-data.test.ts isEmptyWeek boundary
+[x] FE04-AS-7  — admin value reflected in bar height                              | api revenue_trend_spec.rb:BE05-AS-7 + chart-data.test.ts row value maps to bar height
+[x] FE04-AS-8  — tooltip: 6 rows, segment value not cumulative                    | RevenueTrendChart.test.tsx:FE04-AS-8 six rows, $400 not $2,550, hidden series omitted
 
 ## S-001 Choose what the chart shows
 [x] AS-001.T1 — heading reads "This Week's Revenue Trend"                         | Dashboard.test.tsx:AS-001 names the week (heading assertion)
@@ -40,14 +40,14 @@
 [x] BM.AS-025.dashboard — earliest week / visitor / dashboard                      | Dashboard.test.tsx:AS-025 real available_range from response
 
 ## S-002 Read the week's headline figures
-[ ] AS-006.T1 — three figures, no comparison text                                 | owner: S-002
-[ ] AS-006.T2 — average = total / 7 = 2425                                        | owner: S-002
-[ ] AS-007.T1 — "current vs previous (+x%)" rendered                              | owner: S-002
-[ ] AS-007.T2 — increase styled as increase                                       | owner: S-002
-[ ] AS-008    — decrease reads -13.2% and is styled distinguishably               | owner: S-002
-[ ] AS-009    — null delta: previous $0, no percentage at all                     | owner: S-002
-[ ] BM.AS-007.dashboard — comparing / visitor / summary cards                      | owner: S-002
-[ ] BM.AS-009.dashboard — previous-week-untraded / visitor / dashboard             | owner: S-002
+[x] AS-006.T1 — three figures, no comparison text                                 | SummaryCards.test.tsx:AS-006 three figures, no comparison text
+[x] AS-006.T2 — average = total / 7 = 2425                                        | SummaryCards.test.tsx:AS-006 shows the average the API computed
+[x] AS-007.T1 — "current vs previous (+x%)" rendered                              | SummaryCards.test.tsx:AS-007 current, previous and signed change
+[x] AS-007.T2 — increase styled as increase                                       | SummaryCards.test.tsx:AS-007 data-direction=up
+[x] AS-008    — decrease reads -13.2% and is styled distinguishably               | SummaryCards.test.tsx:AS-008 (-13.2%) with data-direction=down
+[x] AS-009    — null delta: previous $0, no percentage at all                     | SummaryCards.test.tsx:AS-009 previous $0, no percentage, no (+0.0%)
+[x] BM.AS-007.dashboard — comparing / visitor / summary cards                      | SummaryCards.test.tsx:AS-007 real summary payload, no mocked card
+[x] BM.AS-009.dashboard — previous-week-untraded / visitor / dashboard             | SummaryCards.test.tsx:AS-009 null delta rendered as absence
 
 ## S-003 Admin signs in and privileged calls are gated
 [x] AS-010    — correct credentials return a token + email                        | sessions_spec.rb:AS-010 issues a token and names the admin
@@ -83,9 +83,9 @@
 
 ## Constraints
 [ ] C-001     — admin-only across list, save, browser pages                       | owner: S-003,S-004,S-005
-[ ] C-002     — total revenue derived, never stored                               | owner: S-002,S-004
+[x] C-002     — total revenue derived, never stored                               | chart-data.test.ts:FE04-AS-3 components only; api trading_days_spec.rb no total column
 [ ] C-003     — no caching between admin save and dashboard read                  | owner: S-001,S-006
-[ ] C-004     — money on the wire as whole-AUD integers                           | owner: S-002,S-004
+[x] C-004     — money on the wire as whole-AUD integers                           | SummaryCards.test.tsx:AS-006 integers formatted in the browser only
 [ ] C-005     — week saved whole or not at all                                    | owner: S-004,S-006
 [x] C-006     — 24h session, expired behaves as absent                            | trading_days_spec.rb:AS-026 24h boundary asserted both sides
 [x] C-007     — cannot page earlier than earliest recorded week                   | week.test.ts hasEarlierWeek boundary + Dashboard.test.tsx:AS-025
