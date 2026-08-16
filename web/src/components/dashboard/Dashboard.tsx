@@ -55,7 +55,7 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
       {error ? (
         <p
           role="alert"
-          className="flex items-start gap-2 rounded-[--radius] border border-negative/25 bg-negative-surface px-4 py-3 text-sm text-negative"
+          className="flex items-start gap-2 rounded-panel border border-negative/25 bg-negative-surface px-4 py-3 text-sm text-negative"
         >
           <svg
             aria-hidden
@@ -92,7 +92,7 @@ export function Dashboard({ fallbackWeekStart }: { fallbackWeekStart: string }) 
         ) : null}
 
         {loading && !data ? (
-          <div className="h-96 animate-pulse rounded-[--radius-lg] bg-surface-sunken" />
+          <div className="h-96 animate-pulse rounded-card bg-surface-sunken" />
         ) : null}
       </div>
     </main>

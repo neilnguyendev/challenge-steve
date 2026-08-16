@@ -51,7 +51,7 @@ function SummaryCard({
   const rising = (figure.delta_pct ?? 0) >= 0;
 
   return (
-    <article className="flex flex-col gap-1 rounded-[--radius-lg] bg-surface-sunken px-5 py-4">
+    <article className="flex flex-col gap-1 rounded-card bg-surface-sunken px-5 py-4">
       <h2 className="text-sm text-text-muted">{label}</h2>
 
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1">

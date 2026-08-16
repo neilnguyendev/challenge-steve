@@ -45,7 +45,7 @@ export function ChartTooltip({
   const row = payload[0].payload;
 
   return (
-    <div className="rounded-[--radius-sm] border border-border bg-surface-raised px-3 py-2 shadow-lg shadow-black/5">
+    <div className="rounded-control border border-border bg-surface-raised px-3 py-2 shadow-lg shadow-black/5">
       <p className="mb-1.5 text-xs font-medium text-text-subtle">
         {row.weekday} {row.date}
       </p>

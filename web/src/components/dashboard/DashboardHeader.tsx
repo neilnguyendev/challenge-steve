@@ -49,14 +49,14 @@ export function DashboardHeader({
           {SERIES_KEYS.map((key) => (
             <label
               key={key}
-              className="flex cursor-pointer items-center gap-2 rounded-[--radius-sm] px-2 py-2 text-sm text-text-muted transition-colors duration-150 hover:bg-surface-hover has-[:focus-visible]:bg-surface-hover"
+              className="flex cursor-pointer items-center gap-2 rounded-control px-2 py-2 text-sm text-text-muted transition-colors duration-150 hover:bg-surface-hover has-[:focus-visible]:bg-surface-hover"
             >
               <input
                 type="checkbox"
                 checked={visibleSeries[key]}
                 onChange={() => onToggleSeries(key)}
                 aria-label={METRIC_LABEL[key]}
-                className="size-4 cursor-pointer accent-[--accent]"
+                className="size-4 cursor-pointer accent-accent"
               />
               {/* A rule, matching the prototype — the round dots belong to the
                   legend. Not the only signal either way: the label names the
@@ -118,7 +118,7 @@ export function DashboardHeader({
             sent to sign in and then brought back here. */}
         <a
           href={`/admin/trading-days?week=${weekStart}`}
-          className="ml-auto inline-flex items-center rounded-[--radius-sm] px-2 py-1.5 underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
+          className="ml-auto inline-flex items-center rounded-control px-2 py-1.5 underline decoration-border-strong underline-offset-4 transition-colors duration-150 hover:text-text hover:decoration-current"
         >
           Edit figures
         </a>
@@ -146,7 +146,7 @@ function WeekStepButton({
       aria-label={label}
       // Kept visually quiet: week navigation is not in the prototype, so it
       // should not compete with the controls that are.
-      className="inline-flex size-9 cursor-pointer items-center justify-center rounded-[--radius-sm] border border-border text-text-muted transition-colors duration-150 hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+      className="inline-flex size-9 cursor-pointer items-center justify-center rounded-control border border-border text-text-muted transition-colors duration-150 hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
     >
       {children}
     </button>

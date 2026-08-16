@@ -39,9 +39,11 @@
   --grid: #e2e8f0;
   --axis-text: #64748b;
 
-  --radius-sm: 0.5rem;
-  --radius: 0.75rem;
-  --radius-lg: 1rem;
+  /* Named for what they wrap, not for how big they are — see @theme below,
+     which turns each into a real utility (rounded-control, rounded-card…). */
+  --radius-control: 0.75rem;
+  --radius-panel: 1rem;
+  --radius-card: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -91,6 +93,10 @@
   --color-positive-surface: var(--positive-surface);
   --color-negative-surface: var(--negative-surface);
 
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --radius-card: var(--radius-card);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -112,7 +118,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
 }
 
 /* Figures line up in a column wherever they are compared. */

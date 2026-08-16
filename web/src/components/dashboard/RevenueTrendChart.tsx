@@ -54,7 +54,7 @@ export function RevenueTrendChart({
     return (
       <div
         role="status"
-        className="flex h-64 items-center justify-center rounded-[--radius-lg] border border-dashed border-border text-sm text-text-subtle"
+        className="flex h-64 items-center justify-center rounded-card border border-dashed border-border text-sm text-text-subtle"
       >
         No data for this period
       </div>
